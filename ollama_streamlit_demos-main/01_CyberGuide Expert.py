@@ -1,3 +1,4 @@
+import ollama
 import streamlit as st
 from openai import OpenAI
 from utilities.icon import page_icon
@@ -54,26 +55,36 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-# Display previous messages
-for message in st.session_state.messages:
-    if message["role"] != "system":  # Don't show system prompt in chat history
-        with st.chat_message(message["role"]):
+    for message in st.session_state.messages:
+        avatar = "🤖" if message["role"] == "assistant" else "😎"
+        with message_container.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
-# User input field
-user_input = st.chat_input("Reply here...")
+    if prompt := st.chat_input("Enter a prompt here..."):
+        try:
+            st.session_state.messages.append(
+                {"role": "user", "content": prompt})
 
-if user_input:
-    # Append user input to chat history
-    st.session_state.messages.append({"role": "user", "content": user_input})
+            message_container.chat_message("user", avatar="😎").markdown(prompt)
 
-    # Generate AI response using Ollama
-    response = ollama.chat(model="llava:latest", messages=st.session_state.messages)
+            with message_container.chat_message("assistant", avatar="🤖"):
+                with st.spinner("model working..."):
+                    stream = client.chat.completions.create(
+                        model=selected_model,
+                        messages=[
+                            {"role": m["role"], "content": m["content"]}
+                            for m in st.session_state.messages
+                        ],
+                        stream=True,
+                    )
+                # stream response
+                response = st.write_stream(stream)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": response})
 
-    # Extract and append the assistant's reply
-    ai_message = response["message"]["content"]
-    st.session_state.messages.append({"role": "assistant", "content": ai_message})
+        except Exception as e:
+            st.error(e, icon="⛔️")
 
-    # Display AI response
-    with st.chat_message("assistant"):
-        st.markdown(ai_message)
+
+if __name__ == "__main__":
+    main()

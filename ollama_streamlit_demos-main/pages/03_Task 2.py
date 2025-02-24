@@ -63,9 +63,9 @@ if "messages" not in st.session_state:
 
 # Display previous messages
 for message in st.session_state.messages:
-    if message["role"] != "system":  # Don't show system prompt in chat history
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    #if message["role"] != "system":  # Don't show system prompt in chat history
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 # User input field
 user_input = st.chat_input("Reply here...")
