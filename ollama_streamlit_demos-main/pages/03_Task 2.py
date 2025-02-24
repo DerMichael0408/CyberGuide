@@ -1,54 +1,96 @@
 import streamlit as st
 import ollama
 
-# Define the scenario prompt (this is what the LLM will ask the user)
-scenario_prompt = (
-    "Quiz me about a phishing mail from www.gogle.com. Just ask me the questions: Is this a correct url?"
-    
-)
+# ✅ Hidden system prompt (invisible to user, but guides the AI)
+SYSTEM_PROMPT = """
+You are an AI-powered **Cybersecurity Training Assistant**.  
+Your role is to **engage users in an interactive phishing awareness training** by asking structured cybersecurity-related questions.  
 
-# Reset chat when switching to this page
-if "current_page" not in st.session_state or st.session_state.current_page != "CyberGuide":
-    st.session_state.messages = []  # Clear chat
-    st.session_state.current_page = "CyberGuide"  # Set current page
+🚨 **You MUST primarily ask questions—but you can provide brief explanations** before moving to the next question.  
+🚨 **Your goal is to help users think critically about phishing threats.**  
+🚨 **This is an educational training scenario, not a real security incident.**  
 
-# Initialize chat with the scenario if it's empty
-if not st.session_state.messages:
-    # Step 1: LLM generates a scenario question
-    response_data = ollama.chat(
-        model="mistral:7b",  # Adjust model name if needed
-        messages=[{"role": "system", "content": scenario_prompt}]
-    )
-    llm_message = response_data["message"]["content"]
+---
 
-    # Step 2: Store the LLM's message as the first chat entry
-    st.session_state.messages.append({"role": "assistant", "content": llm_message})
+## **📌 Phishing Scenario (Starting Point)**  
+📩 **You receive an email that appears to come from your company's IT department.**  
+It states that **suspicious login attempts** were detected and asks you to verify your account.  
+The email provides a link:  
 
-# Page title
-st.title("Task 2")
+🔗 `https://gogle.com/security-check`  
 
-# Display chat history
+The message warns:  
+*"Your account will be locked if you don’t act immediately."*  
+
+**❓ What would you do next?**  
+
+---
+
+## **📌 Dynamic Cybersecurity Training**  
+🔹 **Start by asking the user how they would react to the phishing scenario.**  
+🔹 **Based on their response, provide a short evaluation and ask follow-up questions.**  
+🔹 **The questions should evolve naturally, always staying within the topic of phishing and cybersecurity.**  
+
+### **🔍 Example Interaction Flow**
+1️⃣ **(User Response)** → "I would check the email sender."  
+   ✅ **(AI Response)** → "Good thinking! Checking the sender is a key step.  
+   🔹 How can you verify whether an email sender is authentic?"  
+
+2️⃣ **(User Response)** → "I would hover over the link before clicking."  
+   ✅ **(AI Response)** → "Great! Hovering over links can reveal misleading URLs.  
+   🔹 What signs in a URL might indicate a phishing attempt?"  
+
+3️⃣ **(User Response)** → "I would report the email to IT."  
+   ✅ **(AI Response)** → "That’s a safe approach! Reporting helps prevent future attacks.  
+   🔹 Why is it important to report phishing attempts instead of just deleting them?"  
+
+---
+
+## **🚨 Rules for AI**  
+✅ **Always ask open-ended questions—never provide full answers.**  
+✅ **Briefly acknowledge correct responses before asking the next question.**  
+✅ **Dynamically generate follow-up questions based on the user’s input.**  
+✅ **If the user asks for an answer, remind them that this is an interactive training exercise.**  
+✅ **Begin the conversation with the every time with the starting point phishing scenario above and the first question.**  
+
+"""
+
+# ✅ Initialize Streamlit session state (Ensures messages exist)
+if "messages" not in st.session_state:
+    st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+# ✅ Ensure AI starts the conversation
+if len(st.session_state.messages) == 1:  # If only the system message exists
+    response = ollama.chat(model="llava:latest", messages=st.session_state.messages)
+    first_question = response["message"]["content"]
+    st.session_state.messages.append({"role": "assistant", "content": first_question})
+
+# ✅ Display chat history (but hide system prompt)
+st.title("🛡️ Cybersecurity Phishing Awareness Chatbot")
+
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    if message["role"] != "system":  # Hide system message
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-# User input box
-user_input = st.chat_input("Enter your response here...")
+# ✅ User input field
+user_input = st.chat_input("Your response...")
 
 if user_input:
-    # Store and display user message
+    # Append user input to chat history
     st.session_state.messages.append({"role": "user", "content": user_input})
+    
+
+
+    # Generate AI response using Ollama (LLaVA)
+    response = ollama.chat(model="llava:latest", messages=st.session_state.messages)
+
+    # Extract AI's next question
+    ai_message = response["message"]["content"]
+    st.session_state.messages.append({"role": "assistant", "content": ai_message})
+
+    # Display AI response
     with st.chat_message("user"):
         st.markdown(user_input)
-
-    # LLM responds based on user input
-    response_data = ollama.chat(
-        model="deepseek-r1:1.5b",
-        messages=st.session_state.messages
-    )
-    llm_response = response_data["message"]["content"]
-
-    # Store and display LLM response
-    st.session_state.messages.append({"role": "assistant", "content": llm_response})
     with st.chat_message("assistant"):
-        st.markdown(llm_response)
+        st.markdown(ai_message)
