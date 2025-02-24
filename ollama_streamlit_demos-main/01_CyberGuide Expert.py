@@ -4,7 +4,7 @@ from openai import OpenAI
 from utilities.icon import page_icon
 
 st.set_page_config(
-    page_title="CyberGuide",
+    page_title="CyberGuide", # test
     page_icon="💬",
     layout="wide",
     initial_sidebar_state="expanded",
