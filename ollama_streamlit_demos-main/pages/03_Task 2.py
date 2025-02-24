@@ -3,8 +3,9 @@ import ollama
 
 # Define the scenario prompt (this is what the LLM will ask the user)
 scenario_prompt = (
-    "Quiz me about a phishing mail from www.gogle.com. Just ask me the questions: Is this a correct url?"
-    
+    """
+    Quiz me about phising email recognition and present me with the email content. The email says: "Dear Petra, please send me some money: "htps.google.cmo".
+    """
 )
 
 # Reset chat when switching to this page
@@ -16,7 +17,7 @@ if "current_page" not in st.session_state or st.session_state.current_page != "C
 if not st.session_state.messages:
     # Step 1: LLM generates a scenario question
     response_data = ollama.chat(
-        model="deepseek-r1:1.5b",  # Adjust model name if needed
+        model="gemma:2b",  # Adjust model name if needed
         messages=[{"role": "system", "content": scenario_prompt}]
     )
     llm_message = response_data["message"]["content"]
@@ -43,7 +44,7 @@ if user_input:
 
     # LLM responds based on user input
     response_data = ollama.chat(
-        model="deepseek-r1:1.5b",
+        model="gemma:2b",
         messages=st.session_state.messages
     )
     llm_response = response_data["message"]["content"]
