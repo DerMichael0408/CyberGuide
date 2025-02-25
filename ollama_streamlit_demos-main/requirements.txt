@@ -1,6 +1,8 @@
 ollama
-streamlit==1.33.0
+streamlit==1.42.2
 openai
 chromadb
-sentence_transformer
+sentence_transformers
 fitz
+langchain
+langchain_community
