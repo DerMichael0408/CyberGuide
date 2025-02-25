@@ -1,3 +1,6 @@
 ollama
 streamlit==1.33.0
 openai
+chromadb
+sentence_transformer
+fitz

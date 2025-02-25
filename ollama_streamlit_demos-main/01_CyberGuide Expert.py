@@ -3,6 +3,8 @@ import streamlit as st
 import os
 from openai import OpenAI
 from utilities.icon import page_icon
+from utilities.rag import retrieve_context
+
 
 st.set_page_config(
     page_title="CyberGuide",
@@ -89,18 +91,35 @@ def main():
 
             message_container.chat_message("user", avatar="😎").markdown(prompt)
 
+            # 🔍 Retrieve relevant cybersecurity knowledge from RAG
+            retrieved_context = retrieve_context(prompt)
+
+            # 🔎 Debugging: Show retrieved context in the UI
+            with st.expander("🔍 **Retrieved Cybersecurity Context**", expanded=False):
+                st.info(retrieved_context)
+
             with message_container.chat_message("assistant", avatar="🤖"):
                 with st.spinner("model working..."):
                     stream = client.chat.completions.create(
                         model=selected_model,
                         messages=[
-                            {"role": m["role"], "content": m["content"]}
-                            for m in st.session_state[messages_key]  # Use page-specific messages
+                            {
+                                "role": "system",
+                                "content": f""" 
+                                Try to answer using the retrieved information as much as you can, if the data you need isn't available there, use your training.
+                                
+                                🔹 **Retrieved Knowledge:**
+                                {retrieved_context}
+                                """,
+                            },
+                            {"role": "user", "content": prompt},  # ✅ Keep user input separate!
                         ],
                         stream=True,
                     )
-                # stream response
+
+                # Stream response and store it
                 response = st.write_stream(stream)
+
             
             # Add assistant response to page-specific chat history
             st.session_state[messages_key].append(
