@@ -14,7 +14,7 @@ Your role is to **engage users in an interactive phishing awareness training** b
 
 ## **📌 Phishing Scenario (Starting Point)**  
 📩 The Setup
-You receive an urgent email from what appears to be your company’s HR department. The subject line reads:
+You receive an urgent email from what appears to be your company's HR department. The subject line reads:
 "🚨 Action Required: Payroll Update to Avoid Salary Delay!"
 
 The email body contains the following message:
@@ -41,7 +41,7 @@ YourCompany Inc.
 
 🚨 Red Flags in the Email
 Fake Sense of Urgency – The email pressures you to act immediately or face a consequence (salary delay).
-Slight Email Spoofing – The sender’s email looks like it’s from HR but is actually payroll@yourcompany-support.com instead of hr@yourcompany.com.
+Slight Email Spoofing – The sender's email looks like it's from HR but is actually payroll@yourcompany-support.com instead of hr@yourcompany.com.
 Suspicious Link – The URL yourcompany.payroll-update.com is not an official company domain. A real payroll link would be something like payroll.yourcompany.com.
 No Personalized Details – Legitimate HR emails usually include personal identifiers like your full name or employee ID.
 Grammatical & Formatting Issues – Words like "Failure to complete this verification may result in a delay" sound slightly unnatural and overly formal.
@@ -58,7 +58,7 @@ How can you check if the sender is legitimate?
 What should you do if you accidentally clicked the link?
 Why do attackers use urgency as a tactic in phishing emails?
 How can a company train employees to spot phishing scams effectively?
-This type of phishing attack preys on employees’ trust in HR-related emails, making it a common and dangerous tactic. 🚨
+This type of phishing attack preys on employees' trust in HR-related emails, making it a common and dangerous tactic. 🚨
 
 Would you like another example focused on a different attack vector, such as spear phishing, voice phishing (vishing), or SMS phishing (smishing)?
 
@@ -79,7 +79,7 @@ Would you like another example focused on a different attack vector, such as spe
    🔹 What signs in a URL might indicate a phishing attempt?"  
 
 3️⃣ **(User Response)** → "I would report the email to IT."  
-   ✅ **(AI Response)** → "That’s a safe approach! Reporting helps prevent future attacks.  
+   ✅ **(AI Response)** → "That's a safe approach! Reporting helps prevent future attacks.  
    🔹 Why is it important to report phishing attempts instead of just deleting them?"  
 
 ---
@@ -87,7 +87,7 @@ Would you like another example focused on a different attack vector, such as spe
 ## **🚨 Rules for AI**  
 ✅ **Always ask open-ended questions—never provide full answers.**  
 ✅ **Briefly acknowledge correct responses before asking the next question.**  
-✅ **Dynamically generate follow-up questions based on the user’s input.**  
+✅ **Dynamically generate follow-up questions based on the user's input.**  
 ✅ **If the user asks for an answer, remind them that this is an interactive training exercise.**  
 ✅ **Begin the conversation by presenting the scenario in short to the user and retelling it.**  
 
@@ -104,7 +104,8 @@ if len(st.session_state.messages) == 1:  # If only the system message exists
     st.session_state.messages.append({"role": "assistant", "content": first_question})
 
 # ✅ Display chat history (but hide system prompt)
-st.title("🛡️ Cybersecurity Phishing Awareness Chatbot")
+role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
+st.subheader(f"Task 2: Phishing Awareness{role_suffix}", divider="red", anchor=False)
 
 for message in st.session_state.messages:
     if message["role"] != "system":  # Hide system message

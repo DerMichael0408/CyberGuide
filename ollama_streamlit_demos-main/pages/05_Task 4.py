@@ -13,7 +13,8 @@ st.set_page_config(
 
 def main():
     page_icon("4️⃣")
-    st.subheader("Task 4: Guidelines", divider="red", anchor=False)
+    role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
+    st.subheader(f"Task 4: Security Protocols{role_suffix}", divider="red", anchor=False)
 
     st.subheader("Download Models", anchor=False)
     model_name = st.text_input(
