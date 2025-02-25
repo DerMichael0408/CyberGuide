@@ -94,28 +94,36 @@ counter = 0
 
 
     
+# ✅ Sicherstellen, dass der Counter im Session State existiert
+if "counter" not in st.session_state:
+    st.session_state.counter = 0
+
 if user_input:
     # Append user input to chat history
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
-    
-    
+
     # Generate AI response using Ollama (LLaVA)
     response = ollama.chat(model="llava:latest", messages=st.session_state.messages)
 
     # Extract AI's next question
     ai_message = response["message"]["content"]
-    
+
     st.session_state.messages.append({"role": "assistant", "content": ai_message})
 
-    # Display AI response
-    counter = counter + 1
-    if counter == 2:
-        final_score = ollama.chat(model="llava:latest", messages=st.session_state.messages ++ "Create a final score based on the interaction. Output the format Your Score is: [Insert score here]/100")
-        st.markdown(final_score)
+    # ✅ Counter hochzählen
+    st.session_state.counter += 1  
+
+    # ✅ Wenn 5 Antworten gegeben wurden, generiere eine Bewertung
+    if st.session_state.counter == 4:
+        final_score = ollama.chat(model="llava:latest",  
+                                  messages=st.session_state.messages + 
+                                  [{"role": "system", "content": "Create a final score based on the interaction. Output format: Your Score is: [Insert score here]/100"}])
+        st.markdown(final_score["message"]["content"])
     else:
         with st.chat_message("assistant"):
             st.markdown(ai_message)
+
         
 
