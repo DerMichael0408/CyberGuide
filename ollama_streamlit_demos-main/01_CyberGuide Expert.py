@@ -1,5 +1,6 @@
 import ollama
 import streamlit as st
+import os
 from openai import OpenAI
 from utilities.icon import page_icon
 
@@ -10,6 +11,23 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Function to get the current page name
+def get_current_page():
+    # Get the filename of the current script
+    current_file = os.path.basename(__file__)
+    # Remove the extension
+    page_name = os.path.splitext(current_file)[0]
+    return page_name
+
+# Get current page identifier
+current_page = get_current_page()
+
+# Function to get page-specific session state keys
+def get_page_key(base_key):
+    return f"{current_page}_{base_key}"
+
+# Create page-specific messages key
+messages_key = get_page_key("messages")
 
 def extract_model_names(models_info) -> tuple:
     """
@@ -29,6 +47,9 @@ def main():
     st.header("CyberGuide")
     
     st.subheader("Your Cyber Security Expert", divider="red", anchor=False)
+    
+    # Optionally show current page for debugging
+    # st.caption(f"Current page: {current_page}")
 
     client = OpenAI(
         base_url="http://localhost:11434/v1",
@@ -50,17 +71,20 @@ def main():
 
     message_container = st.container(height=500, border=True)
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    # Initialize page-specific messages if they don't exist
+    if messages_key not in st.session_state:
+        st.session_state[messages_key] = []
 
-    for message in st.session_state.messages:
+    # Display messages from the page-specific chat history
+    for message in st.session_state[messages_key]:
         avatar = "🤖" if message["role"] == "assistant" else "😎"
         with message_container.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
     if prompt := st.chat_input("Enter a prompt here..."):
         try:
-            st.session_state.messages.append(
+            # Add user message to page-specific chat history
+            st.session_state[messages_key].append(
                 {"role": "user", "content": prompt})
 
             message_container.chat_message("user", avatar="😎").markdown(prompt)
@@ -71,13 +95,15 @@ def main():
                         model=selected_model,
                         messages=[
                             {"role": m["role"], "content": m["content"]}
-                            for m in st.session_state.messages
+                            for m in st.session_state[messages_key]  # Use page-specific messages
                         ],
                         stream=True,
                     )
                 # stream response
                 response = st.write_stream(stream)
-            st.session_state.messages.append(
+            
+            # Add assistant response to page-specific chat history
+            st.session_state[messages_key].append(
                 {"role": "assistant", "content": response})
 
         except Exception as e:

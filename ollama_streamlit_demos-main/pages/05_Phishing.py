@@ -2,6 +2,27 @@ import streamlit as st
 import ollama
 import re
 import time
+import os
+
+# Get the current page name from the file name
+def get_current_page():
+    # Get the filename of the current script
+    current_file = os.path.basename(__file__)
+    # Remove the extension
+    page_name = os.path.splitext(current_file)[0]
+    return page_name
+
+# Get current page identifier
+current_page = get_current_page()
+
+# Function to get page-specific session state keys
+def get_page_key(base_key):
+    return f"{current_page}_{base_key}"
+
+# Create page-specific session keys
+messages_key = get_page_key("messages")
+question_number_key = get_page_key("question_number")
+started_key = get_page_key("started")
 
 # Set page config for wider layout and custom title/icon
 st.set_page_config(
@@ -11,7 +32,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for better styling
+# Custom CSS for better styling - unchanged
 st.markdown("""
 <style>
     .main {
@@ -98,7 +119,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Enhanced phishing email content
+# Enhanced phishing email content - unchanged
 email_text = """
 From: security-alerts@globalbank-verification.com
 To: employee@company.com
@@ -127,7 +148,7 @@ Head of Security
 GlobalBank Customer Protection Team
 """
 
-# Improved System Prompt with better questions and formatting guidelines
+# System Prompt - unchanged
 SYSTEM_PROMPT = """
 ## PHISHING AWARENESS TRAINING PROTOCOL
 You are a Cybersecurity Training Assistant delivering an interactive 5-question phishing awareness training.
@@ -167,7 +188,7 @@ YOU MUST:
 - Use clear language that's easy to understand
 """
 
-# Simplified Scientific Scoring Prompt
+# Scoring Instructions - unchanged
 SCORING_INSTRUCTIONS = """
 ## SCIENTIFIC PHISHING AWARENESS ASSESSMENT
 
@@ -194,7 +215,7 @@ Scientific Assessment: [3-4 sentences providing evidence-based evaluation of the
 The score should be a precise reflection of their demonstrated knowledge, not an arbitrary number. Use the assessment framework internally to calculate it, but only output the final score.
 """
 
-# List of improved questions
+# Questions list - unchanged
 questions = [
     "Looking at the sample email provided, what are three specific red flags that indicate this is a phishing attempt?",
     "Which of these URLs is most suspicious and why?\nA) https://company-payroll.com/login\nB) https://globelbank-security-portal.com/verify\nC) https://accounts.google.com/signin\nD) https://yourcompany.com/reset-password",
@@ -203,10 +224,10 @@ questions = [
     "What specific security measures can organizations implement to reduce the risk of successful phishing attacks against their employees?"
 ]
 
-# Pre-defined first question to avoid duplication
+# First question - unchanged
 FIRST_QUESTION = "This is a phishing awareness exercise. I will ask you 5 questions about phishing detection.\n\nQuestion 1/5: Looking at the sample email provided, what are three specific red flags that indicate this is a phishing attempt?"
 
-# Function to nicely format multiple choice options
+# Function to format multiple choice options - unchanged
 def format_multiple_choice(question_text):
     """Format multiple choice options with better styling"""
     if "A)" in question_text and "B)" in question_text:
@@ -226,7 +247,7 @@ def format_multiple_choice(question_text):
         # For non-multiple choice, just add basic styling
         return f'<div class="question-text">{question_text}</div>'
 
-# Function to ensure correct question sequencing and include feedback
+# Function to ensure correct question sequencing - unchanged
 def force_next_question(response, current_question_num):
     """
     Extracts feedback from AI response and adds the next correct question.
@@ -280,7 +301,7 @@ def force_next_question(response, current_question_num):
         # Fallback feedback if none was extracted
         return f"I understand your response.\n\n{next_question}"
 
-# Function to format messages with custom styling
+# Function to format messages - unchanged
 def format_message(message, role):
     if role == "user":
         return f'<div class="user-message">{message}</div>'
@@ -313,21 +334,20 @@ def format_message(message, role):
         # Default formatting for other assistant messages
         return f'<div class="assistant-message">{message}</div>'
 
-# Initialize Streamlit session state
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# Initialize page-specific session state
+if messages_key not in st.session_state:
+    st.session_state[messages_key] = []
     
-# Initialize question counter 
-if "question_number" not in st.session_state:
-    st.session_state.question_number = 0
+if question_number_key not in st.session_state:
+    st.session_state[question_number_key] = 0
     
-# Initialize start flag
-if "started" not in st.session_state:
-    st.session_state.started = False
+if started_key not in st.session_state:
+    st.session_state[started_key] = False
 
-# Display the training title with better styling
+# Display the training title
 st.markdown('<div class="big-title">🛡️ Phishing Awareness Training</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Complete this interactive training to strengthen your defenses against phishing attacks</div>', unsafe_allow_html=True)
+st.markdown(f"<div style='text-align: center; color: #666;'>Page: {current_page}</div>", unsafe_allow_html=True)
 
 # Add columns for layout
 col1, col2 = st.columns([2, 1])
@@ -337,17 +357,17 @@ with col1:
     with st.expander("📧 Sample Phishing Email", expanded=True):
         st.markdown(f'<div class="email-container">{email_text}</div>', unsafe_allow_html=True)
 
-# Display training info in sidebar - FIXED: Only show one progress bar
+# Display training info in sidebar
 with col2:
     st.info("**About this training**\n\n"
             "This interactive phishing awareness course will test your knowledge with 5 key questions.\n\n"
             "Answer carefully! Each response affects your final score.")
     
     # Show progress with custom styling in the sidebar only
-    if st.session_state.question_number > 0:
+    if st.session_state[question_number_key] > 0:
         # Calculate progress percentage
-        progress_percent = min((st.session_state.question_number) * 20, 100)
-        question_display = min(st.session_state.question_number, 5)
+        progress_percent = min((st.session_state[question_number_key]) * 20, 100)
+        question_display = min(st.session_state[question_number_key], 5)
         
         st.write(f"**Progress: {question_display}/5 questions**")
         st.progress(progress_percent)
@@ -355,24 +375,23 @@ with col2:
 # Use the full width for the chat interface
 st.write("---")
 
-# Initialize the training with fixed approach
-if not st.session_state.started:
+# Initialize the training with fixed approach - using page-specific keys
+if not st.session_state[started_key]:
     # Set the initial system prompt
-    st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    st.session_state[messages_key] = [{"role": "system", "content": SYSTEM_PROMPT}]
     
     # Add the email as context (but don't display this)
-    st.session_state.messages.append({"role": "user", "content": f"Let's start the phishing training. The user can see the email in the UI already."})
+    st.session_state[messages_key].append({"role": "user", "content": f"Let's start the phishing training. The user can see the email in the UI already."})
     
     # Use our predefined first question to ensure consistency
     first_message = FIRST_QUESTION
     
     # Add to message history
-    st.session_state.messages.append({"role": "assistant", "content": first_message})
-    st.session_state.started = True
+    st.session_state[messages_key].append({"role": "assistant", "content": first_message})
+    st.session_state[started_key] = True
 
-# Display message history with custom styling
-# Only display non-system messages and skip the initial context message
-for idx, message in enumerate(st.session_state.messages):
+# Display message history with custom styling - using page-specific keys
+for idx, message in enumerate(st.session_state[messages_key]):
     # Skip system messages and the initial context message
     if message["role"] == "system":
         continue
@@ -386,18 +405,18 @@ for idx, message in enumerate(st.session_state.messages):
 user_input = st.chat_input("Type your answer here...")
 
 if user_input:
-    # Append user input to chat history
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    # Append user input to page-specific chat history
+    st.session_state[messages_key].append({"role": "user", "content": user_input})
     st.markdown(format_message(user_input, "user"), unsafe_allow_html=True)
     
     # If we've completed all 5 questions, generate final score
-    if st.session_state.question_number == 4:  # This is the answer to Question 5
+    if st.session_state[question_number_key] == 4:  # This is the answer to Question 5
         with st.spinner("Conducting scientific assessment of your phishing awareness..."):
             # For visual effect, add a short delay
             time.sleep(1.5)
             
             # Generate final score with scientific assessment
-            final_score_messages = st.session_state.messages + [{"role": "system", "content": SCORING_INSTRUCTIONS}]
+            final_score_messages = st.session_state[messages_key] + [{"role": "system", "content": SCORING_INSTRUCTIONS}]
             final_score_response = ollama.chat(model="llava:latest", messages=final_score_messages)
             final_score = final_score_response["message"]["content"]
             
@@ -425,7 +444,7 @@ if user_input:
                 st.markdown(format_message(final_score, "assistant"), unsafe_allow_html=True)
                 
             # Add to message history
-            st.session_state.messages.append({"role": "assistant", "content": final_score})
+            st.session_state[messages_key].append({"role": "assistant", "content": final_score})
             
             # Update progress to show 5/5
             with col2:
@@ -443,24 +462,29 @@ if user_input:
             time.sleep(0.5)
             
             # Get response from LLM
-            response = ollama.chat(model="llava:latest", messages=st.session_state.messages)
+            response = ollama.chat(model="llava:latest", messages=st.session_state[messages_key])
             ai_message = response["message"]["content"]
             
             # Force the correct next question and include feedback
-            fixed_message = force_next_question(ai_message, st.session_state.question_number)
+            fixed_message = force_next_question(ai_message, st.session_state[question_number_key])
             
             # Display the fixed message with enhanced formatting
             st.markdown(format_message(fixed_message, "assistant"), unsafe_allow_html=True)
             
             # Add to message history
-            st.session_state.messages.append({"role": "assistant", "content": fixed_message})
+            st.session_state[messages_key].append({"role": "assistant", "content": fixed_message})
             
             # Increment question counter
-            st.session_state.question_number += 1
+            st.session_state[question_number_key] += 1
             
             # Update progress in the sidebar
             with col2:
-                question_display = min(st.session_state.question_number, 5)
-                progress_percent = min(st.session_state.question_number * 20, 100)
+                question_display = min(st.session_state[question_number_key], 5)
+                progress_percent = min(st.session_state[question_number_key] * 20, 100)
                 st.write(f"**Progress: {question_display}/5 questions**")
                 st.progress(progress_percent)
+
+# Debug information (optional) - comment out in production
+# st.sidebar.write(f"Current page: {current_page}")
+# st.sidebar.write(f"Messages key: {messages_key}")
+# st.sidebar.write(f"Question number: {st.session_state[question_number_key]}")

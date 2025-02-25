@@ -2,6 +2,28 @@ import streamlit as st
 import ollama
 import re
 import time
+import os
+
+# Function to get the current page name
+def get_current_page():
+    # Get the filename of the current script
+    current_file = os.path.basename(__file__)
+    # Remove the extension
+    page_name = os.path.splitext(current_file)[0]
+    return page_name
+
+# Get current page identifier
+current_page = get_current_page()
+
+# Function to get page-specific session state keys
+def get_page_key(base_key):
+    return f"{current_page}_{base_key}"
+
+# Create page-specific session keys
+messages_key = get_page_key("messages")
+question_index_key = get_page_key("question_index")
+started_key = get_page_key("started")
+training_complete_key = get_page_key("training_complete")
 
 # Set page config for wider layout and custom title/icon
 st.set_page_config(
@@ -87,6 +109,12 @@ st.markdown("""
         font-weight: bold;
         color: #1E3A8A;
         margin-bottom: 5px;
+    }
+    .page-indicator {
+        font-size: 12px;
+        color: #888;
+        text-align: center;
+        margin-bottom: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -182,38 +210,39 @@ def format_message(message, role):
         # Default formatting for other assistant messages
         return f'<div class="assistant-message">{message}</div>'
 
-# Titel des Trainings mit besserem Styling anzeigen
+# Display the training title with better styling
 st.markdown('<div class="big-title">🔐 Password Creation Training</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Complete this interactive training to learn how to create strong, secure passwords</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="page-indicator">Page: {current_page}</div>', unsafe_allow_html=True)
 
-# Initialize session state variables
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# Initialize page-specific session state variables
+if messages_key not in st.session_state:
+    st.session_state[messages_key] = []
 
-if "question_index" not in st.session_state:
-    st.session_state.question_index = 0
+if question_index_key not in st.session_state:
+    st.session_state[question_index_key] = 0
 
-if "started" not in st.session_state:
-    st.session_state.started = False
+if started_key not in st.session_state:
+    st.session_state[started_key] = False
 
-if "training_complete" not in st.session_state:
-    st.session_state.training_complete = False
+if training_complete_key not in st.session_state:
+    st.session_state[training_complete_key] = False
 
-# Spalten für Layout hinzufügen
+# Add columns for layout
 col1, col2 = st.columns([3, 1])
 
-# trainings info
+# Display training info in sidebar
 with col2:
     st.info("**About this training**\n\n"
             "This interactive password security course will test your knowledge with 5 key questions.\n\n"
             "Learn how to create strong passwords that protect your accounts from unauthorized access.")
     
-    # Fortschritt mit benutzerdefiniertem Styling anzeigen
-    if st.session_state.question_index > 0:
-        st.write(f"**Progress: {st.session_state.question_index}/5 questions**")
-        progress = st.progress(min(st.session_state.question_index * 20, 100))
+    # Show progress with custom styling
+    if st.session_state[question_index_key] > 0:
+        st.write(f"**Progress: {st.session_state[question_index_key]}/5 questions**")
+        progress = st.progress(min(st.session_state[question_index_key] * 20, 100))
         
-    # Password Tips in der Seitenleiste
+    # Password Tips in the sidebar
     with st.expander("📌 Password Security Tips", expanded=False):
         st.markdown("""
         <div class="password-tips">
@@ -241,38 +270,39 @@ with col1:
     st.write("---")
 
     # Start training when the app loads
-    if not st.session_state.started:
+    if not st.session_state[started_key]:
         # Present first question
         first_message = f"Welcome to password creation training. I will help you learn how to create stronger, more secure passwords.\n\nQuestion 1/5: {QUESTIONS[0]}"
-        st.session_state.messages.append({"role": "assistant", "content": first_message})
-        st.session_state.started = True
-        st.session_state.question_index = 1
+        st.session_state[messages_key].append({"role": "assistant", "content": first_message})
+        st.session_state[started_key] = True
+        st.session_state[question_index_key] = 1
 
-    # Message History
-    for message in st.session_state.messages:
+    # Display message history from page-specific chat
+    for message in st.session_state[messages_key]:
         st.markdown(format_message(message["content"], message["role"]), unsafe_allow_html=True)
 
-    # User entry field
-    if not st.session_state.training_complete:
+    # User input field
+    if not st.session_state[training_complete_key]:
         user_input = st.chat_input("Type your answer here...")
         
         if user_input:
-            st.session_state.messages.append({"role": "user", "content": user_input})
+            # Add to page-specific message history
+            st.session_state[messages_key].append({"role": "user", "content": user_input})
             
-            # WICHTIG: reload
+            # IMPORTANT: rerun to update UI
             st.rerun()
 
     # After rerun: Check if there's a new user response and generate AI response
-    if st.session_state.messages and st.session_state.messages[-1]["role"] == "user" and not st.session_state.training_complete:
+    if st.session_state[messages_key] and st.session_state[messages_key][-1]["role"] == "user" and not st.session_state[training_complete_key]:
         with st.spinner("Processing your answer..."):
-            # Für visuellen Effekt eine kurze Verzögerung hinzufügen
+            # Add a short delay for visual effect
             time.sleep(0.5)
             
-            # user input
-            user_answer = st.session_state.messages[-1]["content"]
+            # Get user input
+            user_answer = st.session_state[messages_key][-1]["content"]
             
-            if st.session_state.question_index == 5:
-                # Endgültige Bewertung generieren
+            if st.session_state[question_index_key] == 5:
+                # Generate final score
                 final_score_messages = [
                     {"role": "system", "content": SCORING_INSTRUCTIONS},
                     {"role": "user", "content": f"Evaluate this password: {user_answer}"}
@@ -285,7 +315,7 @@ with col1:
                 if score_match:
                     score_num = int(score_match.group(1))
                     
-                    # Score bord
+                    # Create score display
                     score_html = f"""
                     <div class="score-container">
                         <h2>Training Complete! 🎉</h2>
@@ -295,9 +325,10 @@ with col1:
                     """
                     st.markdown(score_html, unsafe_allow_html=True)
                     
-                    st.session_state.messages.append({"role": "assistant", "content": final_score})
+                    # Add to page-specific message history
+                    st.session_state[messages_key].append({"role": "assistant", "content": final_score})
                     
-                    st.session_state.training_complete = True
+                    st.session_state[training_complete_key] = True
                     
                     if "progress" in locals():
                         progress.progress(100)
@@ -314,35 +345,35 @@ with col1:
             else:
                 system_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
                 
-                context_message = f"The user has answered question {st.session_state.question_index}. Give brief feedback and then ask question {st.session_state.question_index + 1}."
+                context_message = f"The user has answered question {st.session_state[question_index_key]}. Give brief feedback and then ask question {st.session_state[question_index_key] + 1}."
                 system_messages.append({"role": "user", "content": context_message})
                 
                 feedback_messages = system_messages + [
-                    {"role": "user", "content": f"Question {st.session_state.question_index}: {QUESTIONS[st.session_state.question_index - 1]}"},
+                    {"role": "user", "content": f"Question {st.session_state[question_index_key]}: {QUESTIONS[st.session_state[question_index_key] - 1]}"},
                     {"role": "user", "content": f"User's answer: {user_answer}"}
                 ]
                 
                 response = ollama.chat(model="llava:latest", messages=feedback_messages)
                 ai_message = response["message"]["content"]
                 
-                if f"Question {st.session_state.question_index + 1}/5:" not in ai_message:
-
+                if f"Question {st.session_state[question_index_key] + 1}/5:" not in ai_message:
                     feedback = ai_message.strip()
+                    ai_message = f"{feedback}\n\nQuestion {st.session_state[question_index_key] + 1}/5: {QUESTIONS[st.session_state[question_index_key]]}"
 
-                    ai_message = f"{feedback}\n\nQuestion {st.session_state.question_index + 1}/5: {QUESTIONS[st.session_state.question_index]}"
-
-                st.session_state.messages.append({"role": "assistant", "content": ai_message})
+                # Add to page-specific message history
+                st.session_state[messages_key].append({"role": "assistant", "content": ai_message})
                 
-                st.session_state.question_index += 1
+                # Increment page-specific question counter
+                st.session_state[question_index_key] += 1
                 
                 st.rerun()
 
 # Reset button (only show in completed state)
-if st.session_state.training_complete:
+if st.session_state[training_complete_key]:
     if st.button("Start New Training"):
-        # Reset all session state variables
-        st.session_state.messages = []
-        st.session_state.question_index = 0
-        st.session_state.started = False
-        st.session_state.training_complete = False
+        # Reset all page-specific session state variables
+        st.session_state[messages_key] = []
+        st.session_state[question_index_key] = 0
+        st.session_state[started_key] = False
+        st.session_state[training_complete_key] = False
         st.rerun()
