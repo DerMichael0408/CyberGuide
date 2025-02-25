@@ -25,8 +25,6 @@ def main():
     """
     The main function that runs the application.
     """
-    st.sidebar.title("CyberGuide Navigation")
-
     page_icon("💬")
     st.header("CyberGuide")
     

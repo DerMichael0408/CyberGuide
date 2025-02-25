@@ -44,11 +44,9 @@ def get_allowed_model_names(models_info: dict) -> tuple:
 def main():
     
     page_icon("1️⃣")
-    st.subheader("Task 1: Phising", divider="red", anchor=False)
+    role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
+    st.subheader(f"Task 1: Phishing{role_suffix}", divider="red", anchor=False)
     
-    st.sidebar.title("CyberGuide Navigation")
-    
-
     models_info = ollama.list()
     available_models = get_allowed_model_names(models_info)
     missing_models = set(["bakllava:latest", "llava:latest"]) - set(available_models)
