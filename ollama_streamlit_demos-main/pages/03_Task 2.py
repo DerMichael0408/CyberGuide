@@ -129,97 +129,191 @@ GlobalBank Customer Protection Team
 
 # Improved System Prompt with better questions and formatting guidelines
 SYSTEM_PROMPT = """
-You are an AI-powered **Cybersecurity Training Assistant**.  
-Your role is to **engage users in an interactive phishing awareness training** by asking structured cybersecurity-related questions.  
+## PHISHING AWARENESS TRAINING PROTOCOL
+You are a Cybersecurity Training Assistant delivering an interactive 5-question phishing awareness training.
 
-🚨 **You MUST primarily ask questions—but you can provide brief explanations** before moving to the next question.  
-🚨 **Your goal is to help users think critically about phishing threats.**  
-🚨 **This is an educational training scenario, not a real security incident.**  
+## QUESTION SEQUENCE (MUST FOLLOW EXACTLY)
+The training consists of exactly these 5 questions in this order:
 
----
+1. "Looking at the sample email provided, what are three specific red flags that indicate this is a phishing attempt?"
 
-## **📌 Phishing Scenario (Starting Point)**  
-📩 The Setup
-You receive an urgent email from what appears to be your company’s HR department. The subject line reads:
-"🚨 Action Required: Payroll Update to Avoid Salary Delay!"
+2. "Which of these URLs is most suspicious and why?
+   A) https://company-payroll.com/login
+   B) https://globelbank-security-portal.com/verify
+   C) https://accounts.google.com/signin
+   D) https://yourcompany.com/reset-password"
 
-The email body contains the following message:
+3. "If you accidentally clicked on the phishing link in the email, what immediate steps should you take to minimize potential damage?"
 
-From: payroll@yourcompany-support.com
-To: You
-Subject: 🚨 Urgent: Payroll System Update Required
+4. "The email creates a false sense of urgency by mentioning a 24-hour deadline. Why is creating urgency a common tactic in phishing attacks?"
 
-Dear [Your Name],
+5. "What specific security measures can organizations implement to reduce the risk of successful phishing attacks against their employees?"
 
-We have recently updated our payroll system to enhance security and ensure compliance with the latest regulations. To prevent any delays in your upcoming salary payment, please log in to confirm your account details.
+## CRITICAL RESPONSE FORMAT
+YOU MUST:
+1. Start with "This is a phishing awareness exercise" and ask Question 1
+2. For each user response:
+   a. FIRST provide informative feedback on their answer (1-2 sentences)
+   b. THEN immediately ask the next question in sequence
+3. Format multiple choice options in a clean, visually appealing way
+4. ALWAYS include the correct question number (e.g., "Question 2/5:", "Question 3/5:", etc.)
+5. NEVER repeat a question
+6. NEVER use lettered points (a), b), etc.) in your feedback - use plain text only
 
-Click the secure link below to verify your account before 5:00 PM today:
-
-🔗 Update Payroll Information
-
-Failure to complete this verification may result in a delay or disruption in salary disbursement.
-
-Thank you for your prompt attention.
-
-Best regards,
-HR & Payroll Team
-YourCompany Inc.
-
-🚨 Red Flags in the Email
-Fake Sense of Urgency – The email pressures you to act immediately or face a consequence (salary delay).
-Slight Email Spoofing – The sender’s email looks like it’s from HR but is actually payroll@yourcompany-support.com instead of hr@yourcompany.com.
-Suspicious Link – The URL yourcompany.payroll-update.com is not an official company domain. A real payroll link would be something like payroll.yourcompany.com.
-No Personalized Details – Legitimate HR emails usually include personal identifiers like your full name or employee ID.
-Grammatical & Formatting Issues – Words like "Failure to complete this verification may result in a delay" sound slightly unnatural and overly formal.
-🔍 How to Handle This Situation
-DO NOT Click the Link – Hover over the link to inspect the real URL without clicking it.
-Verify with HR Directly – Contact HR through official company channels to confirm if they sent the email.
-Report the Email – Forward the email to your IT/security team.
-Check for Spoofing – Look at the actual email address behind the display name.
-Stay Alert for Similar Attempts – Phishing scams evolve and may use different wording or sender addresses in future attempts.
-❓ Follow-Up Questions for Training
-First, you AI, present the scenario to the user!!
-What would be your first reaction after receiving this email?
-How can you check if the sender is legitimate?
-What should you do if you accidentally clicked the link?
-Why do attackers use urgency as a tactic in phishing emails?
-How can a company train employees to spot phishing scams effectively?
-This type of phishing attack preys on employees’ trust in HR-related emails, making it a common and dangerous tactic. 🚨
-
-Would you like another example focused on a different attack vector, such as spear phishing, voice phishing (vishing), or SMS phishing (smishing)?
-
----
-
-## **📌 Dynamic Cybersecurity Training**  
-🔹 **Start by asking the user how they would react to the phishing scenario.**  
-🔹 **Based on their response, provide a short evaluation and ask follow-up questions.**  
-🔹 **The questions should evolve naturally, always staying within the topic of phishing and cybersecurity.**  
-
-### **🔍 Example Interaction Flow**
-1️⃣ **(User Response)** → "I would check the email sender."  
-   ✅ **(AI Response)** → "Good thinking! Checking the sender is a key step.  
-   🔹 How can you verify whether an email sender is authentic?"  
-
-2️⃣ **(User Response)** → "I would hover over the link before clicking."  
-   ✅ **(AI Response)** → "Great! Hovering over links can reveal misleading URLs.  
-   🔹 What signs in a URL might indicate a phishing attempt?"  
-
-3️⃣ **(User Response)** → "I would report the email to IT."  
-   ✅ **(AI Response)** → "That’s a safe approach! Reporting helps prevent future attacks.  
-   🔹 Why is it important to report phishing attempts instead of just deleting them?"  
-
----
-
-## **🚨 Rules for AI**  
-✅ **Always ask open-ended questions—never provide full answers.**  
-✅ **Briefly acknowledge correct responses before asking the next question.**  
-✅ **Dynamically generate follow-up questions based on the user’s input.**  
-✅ **If the user asks for an answer, remind them that this is an interactive training exercise.**  
-✅ **Begin the conversation by presenting the scenario in short to the user and retelling it.**  
-
+## FORMATTING GUIDELINES
+- For Question 2 (multiple choice), format the options in a clean, visually appealing way
+- Make questions visually distinct by using proper spacing
+- Keep feedback concise and focused on key learning points
+- Use clear language that's easy to understand
 """
 
-# ✅ Initialize Streamlit session state (Ensures messages exist)
+# Simplified Scientific Scoring Prompt
+SCORING_INSTRUCTIONS = """
+## SCIENTIFIC PHISHING AWARENESS ASSESSMENT
+
+Conduct a rigorous and scientific evaluation of the user's phishing awareness based on their 5 responses.
+
+### Scientific Assessment Framework:
+When calculating the final score, consider these key areas (but do NOT include separate scores for each in your output):
+
+1. **Threat Recognition**: Ability to identify phishing indicators (URLs, sender details, urgency tactics)
+2. **Technical Knowledge**: Understanding of phishing infrastructure and methodology
+3. **Response Protocols**: Knowledge of appropriate actions when encountering potential threats
+4. **Preventative Measures**: Awareness of organizational and personal security practices
+5. **Critical Thinking**: Application of analytical reasoning to security scenarios
+
+### Output Format Requirements:
+You MUST use EXACTLY this format:
+
+```
+Thank you for completing the phishing awareness training. Your final score is: [X]/100.
+
+Scientific Assessment: [3-4 sentences providing evidence-based evaluation of their phishing awareness, including strengths, areas for improvement, and specific recommendations]
+```
+
+The score should be a precise reflection of their demonstrated knowledge, not an arbitrary number. Use the assessment framework internally to calculate it, but only output the final score.
+"""
+
+# List of improved questions
+questions = [
+    "Looking at the sample email provided, what are three specific red flags that indicate this is a phishing attempt?",
+    "Which of these URLs is most suspicious and why?\nA) https://company-payroll.com/login\nB) https://globelbank-security-portal.com/verify\nC) https://accounts.google.com/signin\nD) https://yourcompany.com/reset-password",
+    "If you accidentally clicked on the phishing link in the email, what immediate steps should you take to minimize potential damage?",
+    "The email creates a false sense of urgency by mentioning a 24-hour deadline. Why is creating urgency a common tactic in phishing attacks?",
+    "What specific security measures can organizations implement to reduce the risk of successful phishing attacks against their employees?"
+]
+
+# Pre-defined first question to avoid duplication
+FIRST_QUESTION = "This is a phishing awareness exercise. I will ask you 5 questions about phishing detection.\n\nQuestion 1/5: Looking at the sample email provided, what are three specific red flags that indicate this is a phishing attempt?"
+
+# Function to nicely format multiple choice options
+def format_multiple_choice(question_text):
+    """Format multiple choice options with better styling"""
+    if "A)" in question_text and "B)" in question_text:
+        # Split the question into the prompt and options
+        main_text, options_text = question_text.split("A)", 1)
+        options_text = "A)" + options_text
+        
+        # Split options and format them
+        options = re.findall(r'([A-D]\))([^A-D\)]+)', options_text)
+        formatted_options = ""
+        for opt_letter, opt_text in options:
+            formatted_options += f'<div class="multiple-choice-option">{opt_letter}{opt_text}</div>'
+        
+        # Combine with styled question text
+        return f'<div class="question-text">{main_text}</div><div class="multiple-choice">{formatted_options}</div>'
+    else:
+        # For non-multiple choice, just add basic styling
+        return f'<div class="question-text">{question_text}</div>'
+
+# Function to ensure correct question sequencing and include feedback
+def force_next_question(response, current_question_num):
+    """
+    Extracts feedback from AI response and adds the next correct question.
+    Removes any lettered points (a), b), etc.) and ensures clean formatting.
+    """
+    # Get the next question number (0-indexed internally, 1-indexed for display)
+    next_question_idx = current_question_num + 1
+    
+    # If we're done with questions, just return the response
+    if next_question_idx >= 5:
+        return response
+    
+    # Process AI feedback
+    # Remove any existing questions
+    question_patterns = [
+        "Question 1/5:", "Question 2/5:", "Question 3/5:", "Question 4/5:", "Question 5/5:",
+        "Looking at the sample", "Which of these URLs", "If you accidentally", 
+        "The email creates", "What specific security"
+    ]
+    
+    # Get the feedback portion by removing question text
+    cleaned_text = response
+    for pattern in question_patterns:
+        if pattern in cleaned_text:
+            parts = cleaned_text.split(pattern, 1)
+            cleaned_text = parts[0]
+    
+    # Remove any lettered or numbered points (a), b), 1., 2., etc.)
+    cleaned_text = re.sub(r'[a-z]\)\s+', '', cleaned_text)
+    cleaned_text = re.sub(r'[A-Z]\)\s+', '', cleaned_text)
+    cleaned_text = re.sub(r'\d+\.\s+', '', cleaned_text)
+    cleaned_text = re.sub(r'•\s+', '', cleaned_text)
+    
+    # Remove "Progress: X/5 questions" text if it appears
+    cleaned_text = re.sub(r'Progress: \d/5 questions', '', cleaned_text)
+    
+    # Ensure we get at least one complete sentence of feedback
+    # Get sentences but preserve proper formatting
+    sentences = re.split(r'(?<=[.!?])\s+', cleaned_text.strip())
+    
+    # Make sure we have at least one sentence but not more than 3
+    feedback = ' '.join(sentences[:min(3, len(sentences))]).strip()
+    
+    # Build the correct next question text with proper numbering
+    next_question = f"Question {next_question_idx+1}/5: {questions[next_question_idx]}"
+    
+    # Combine feedback with next question, ensuring there's a proper break between them
+    if feedback:
+        return f"{feedback}\n\n{next_question}"
+    else:
+        # Fallback feedback if none was extracted
+        return f"I understand your response.\n\n{next_question}"
+
+# Function to format messages with custom styling
+def format_message(message, role):
+    if role == "user":
+        return f'<div class="user-message">{message}</div>'
+    else:
+        # Format assistant messages by highlighting the question number
+        if "Question" in message and "/5:" in message:
+            # Split by question marker to highlight it
+            parts = re.split(r'(Question \d/5:)', message, 1)
+            if len(parts) > 1:
+                feedback = parts[0].strip()
+                question_part = parts[1]
+                question_text = parts[2] if len(parts) > 2 else ""
+                
+                formatted = ""
+                if feedback:
+                    formatted += f'<div class="feedback">{feedback}</div>'
+                
+                # Format question number
+                formatted_question = f'<span class="question-number">{question_part}</span>'
+                
+                # Format the question text (with special handling for multiple choice)
+                if "A)" in question_text and "B)" in question_text:
+                    formatted_content = format_multiple_choice(question_text)
+                    formatted += f'<div>{formatted_question} {formatted_content}</div>'
+                else:
+                    formatted += f'<div>{formatted_question} {question_text}</div>'
+                
+                return f'<div class="assistant-message">{formatted}</div>'
+        
+        # Default formatting for other assistant messages
+        return f'<div class="assistant-message">{message}</div>'
+
+# Initialize Streamlit session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
     
@@ -265,20 +359,28 @@ st.write("---")
 if not st.session_state.started:
     # Set the initial system prompt
     st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    
+    # Add the email as context (but don't display this)
+    st.session_state.messages.append({"role": "user", "content": f"Let's start the phishing training. The user can see the email in the UI already."})
+    
+    # Use our predefined first question to ensure consistency
+    first_message = FIRST_QUESTION
+    
+    # Add to message history
+    st.session_state.messages.append({"role": "assistant", "content": first_message})
+    st.session_state.started = True
 
-# ✅ Ensure AI starts the conversation
-if len(st.session_state.messages) == 1:  # If only the system message exists
-    response = ollama.chat(model="llava:latest", messages=st.session_state.messages)
-    first_question = response["message"]["content"]
-    st.session_state.messages.append({"role": "assistant", "content": first_question})
-
-# ✅ Display chat history (but hide system prompt)
-st.title("🛡️ Cybersecurity Phishing Awareness Chatbot")
-
-for message in st.session_state.messages:
-    if message["role"] != "system":  # Hide system message
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+# Display message history with custom styling
+# Only display non-system messages and skip the initial context message
+for idx, message in enumerate(st.session_state.messages):
+    # Skip system messages and the initial context message
+    if message["role"] == "system":
+        continue
+    if idx == 1 and message["role"] == "user" and "Let's start the phishing training" in message["content"]:
+        continue
+    
+    # Display the message with enhanced formatting
+    st.markdown(format_message(message["content"], message["role"]), unsafe_allow_html=True)
 
 # User input field with custom prompt
 user_input = st.chat_input("Type your answer here...")
