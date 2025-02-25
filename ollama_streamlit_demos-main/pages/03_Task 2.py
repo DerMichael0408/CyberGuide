@@ -92,9 +92,7 @@ for message in st.session_state.messages:
 user_input = st.chat_input("Your response...")
 counter = 0
 
-if counter == 2:
-    final_score = ollama.chat(model="llava:latest", messages=st.session_state.messages ++ "Create a final score based on the interaction. Output the format Your Score is: [Insert score here]/100")
-    st.markdown(final_score)
+
     
 if user_input:
     # Append user input to chat history
@@ -113,7 +111,11 @@ if user_input:
 
     # Display AI response
     counter = counter + 1
-    with st.chat_message("assistant"):
-        st.markdown(ai_message)
+    if counter == 2:
+        final_score = ollama.chat(model="llava:latest", messages=st.session_state.messages ++ "Create a final score based on the interaction. Output the format Your Score is: [Insert score here]/100")
+        st.markdown(final_score)
+    else:
+        with st.chat_message("assistant"):
+            st.markdown(ai_message)
         
 
