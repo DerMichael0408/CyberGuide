@@ -6,3 +6,6 @@ sentence_transformers
 fitz
 langchain
 langchain_community
+langchain-huggingface
+langchain-chroma
+torch
