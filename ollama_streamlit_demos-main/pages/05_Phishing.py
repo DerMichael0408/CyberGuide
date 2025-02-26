@@ -449,8 +449,7 @@ if user_input:
             #Update all_chat with local chat history
             if "all_chats" not in st.session_state:
                 st.session_state["all_chats"] = {}
-            st.session_state["all_chats"][current_page] = st.session_state[messages_key]
-            #print(st.session_state["all_chats"])    
+            st.session_state["all_chats"][current_page] = st.session_state[messages_key]   
             
             # Update progress to show 5/5
             with col2:
