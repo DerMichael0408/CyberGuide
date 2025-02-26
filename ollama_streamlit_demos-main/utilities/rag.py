@@ -1,10 +1,12 @@
 import chromadb
 import fitz  # PyMuPDF
+import json
 from sentence_transformers import SentenceTransformer
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import PyMuPDFLoader
+from langchain.schema import Document
 
 
 
@@ -29,73 +31,96 @@ def extract_text_from_pdf(pdf_path):
         text += page.get_text("text") + "\n"
     return text
 
-"""
-def index_pdf(pdf_path):
-    text = extract_text_from_pdf(pdf_path)
-    sentences = text.split("\n")
-    
-    pdf_id_prefix = pdf_path.replace(" ", "_")  # Normalize filename
-    existing_ids = {item["id"] for item in collection.get()["metadatas"]}  # Get stored IDs
-
-    embeddings = embedder.encode(sentences).tolist()
-
-    new_data = []
-    for i, sentence in enumerate(sentences):
-        unique_id = f"{pdf_id_prefix}_{i}"
-        
-        # Only add if the ID is not already stored
-        if unique_id not in existing_ids:
-            new_data.append(
-                {
-                    "id": unique_id,
-                    "embedding": embeddings[i],
-                    "metadata": {"text": sentence}
-                }
-            )
-
-    if new_data:
-        collection.add(
-            ids=[item["id"] for item in new_data],
-            embeddings=[item["embedding"] for item in new_data],
-            metadatas=[item["metadata"] for item in new_data],
-        )
-        print(f"Indexed {len(new_data)} new entries from {pdf_path}")
-    else:
-        print(f"Skipped indexing for {pdf_path}, as all entries already exist.")
-"""
-
-
-
-def index_pdf(pdf_path):
-    """Indexes cybersecurity PDFs into the vector store without skipping new documents."""
+def index_data(file_path):
+    """Indexes both PDFs and JSON files into the vector store."""
     global vector_store
 
-    loader = PyMuPDFLoader(pdf_path)
-    documents = loader.load()
+    documents = []
 
-    # Increase chunk size to keep more context together
+    if file_path.endswith(".pdf"):
+        # ✅ Handle PDF Files
+        doc = fitz.open(file_path)
+        text = "\n".join([page.get_text("text") for page in doc])
+        documents.append(Document(page_content=text, metadata={"source": file_path}))
+
+    elif file_path.endswith(".json"):
+        # ✅ Handle JSON Files
+        with open(file_path, "r", encoding="utf-8") as f:
+            json_data = json.load(f)
+
+        if "scenarios" in json_data and isinstance(json_data["scenarios"], list):
+            for scenario in json_data["scenarios"]:
+                title = scenario.get("title", "No Title")
+                description = scenario.get("description", "")
+                tasks = " ".join(scenario.get("tasks", []))
+                solution = scenario.get("solution", "")
+                learning_objectives = " ".join(scenario.get("learning_objectives", []))
+
+                combined_text = f"Scenario: {title}\n\nDescription: {description}\n\nTasks: {tasks}\n\nSolution: {solution}\n\nLearning Objectives: {learning_objectives}"
+                
+                documents.append(Document(page_content=combined_text, metadata={"source": file_path}))
+
+    else:
+        print(f"⚠️ Unsupported file type: {file_path}")
+        return
+
+    # ✅ Use chunking to keep context
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=300)
     docs = text_splitter.split_documents(documents)
 
-    # Fetch existing document IDs safely
+    # ✅ Avoid indexing duplicate data
     existing_metadatas = vector_store.get()["metadatas"]
-    existing_ids = set(m["source"] for m in existing_metadatas if "source" in m)  # ✅ Extract unique IDs
+    existing_ids = set(m["source"] for m in existing_metadatas if "source" in m)
 
     new_data = []
     for i, doc in enumerate(docs):
-        doc_id = f"{pdf_path}_{i}"  # Generate unique ID for each document
+        doc_id = f"{file_path}_{i}"  # Generate unique ID for each chunk
 
-        if doc_id not in existing_ids:  # ✅ Only add if this specific chunk is new
-            doc.metadata["source"] = doc_id  # ✅ Add unique ID to metadata
+        if doc_id not in existing_ids:  # ✅ Only add if new
+            doc.metadata["source"] = doc_id
             new_data.append(doc)
 
-
     if new_data:
-        vector_store.add_documents(new_data)  # ✅ Add only new documents
+        vector_store.add_documents(new_data)
         vector_store.persist()
-        print(f"Indexed {len(new_data)} new chunks from {pdf_path}")
+        print(f"✅ Indexed {len(new_data)} new chunks from {file_path}")
     else:
-        print(f"Skipped indexing for {pdf_path}, as all chunks already exist.")
+        print(f"⚠️ Skipped indexing for {file_path}, as all chunks already exist.")
+
+
+# def index_pdf(pdf_path):
+#     """Indexes cybersecurity PDFs into the vector store without skipping new documents."""
+#     global vector_store
+
+#     loader = PyMuPDFLoader(pdf_path)
+#     documents = loader.load()
+
+#     # Increase chunk size to keep more context together
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=300)
+#     docs = text_splitter.split_documents(documents)
+
+#     # Fetch existing document IDs safely
+#     existing_metadatas = vector_store.get()["metadatas"]
+#     existing_ids = set(m["source"] for m in existing_metadatas if "source" in m)  # ✅ Extract unique IDs
+
+#     new_data = []
+#     for i, doc in enumerate(docs):
+#         doc_id = f"{pdf_path}_{i}"  # Generate unique ID for each document
+
+#         if doc_id not in existing_ids:  # ✅ Only add if this specific chunk is new
+#             doc.metadata["source"] = doc_id  # ✅ Add unique ID to metadata
+#             new_data.append(doc)
+
+
+#     if new_data:
+#         vector_store.add_documents(new_data)  # ✅ Add only new documents
+#         vector_store.persist()
+#         print(f"Indexed {len(new_data)} new chunks from {pdf_path}")
+#     else:
+#         print(f"Skipped indexing for {pdf_path}, as all chunks already exist.")
+
+
+
 
 # def retrieve_context(query, k=3):
 #     """Retrieves a limited number of relevant chunks and filters results."""
@@ -166,4 +191,6 @@ def retrieve_context(query, k=5):
 
 
 # Example: Index a document
-index_pdf("./cybersecurity_basics.pdf")
+index_data("./Petra_logistics.pdf")
+index_data("./CybersecurityScenarios.json")
+

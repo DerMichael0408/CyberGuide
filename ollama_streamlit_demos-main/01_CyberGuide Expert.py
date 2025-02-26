@@ -105,9 +105,7 @@ def main():
                         messages=[
                             {
                                 "role": "system",
-                                "content": f""" 
-                                Try to answer using the retrieved information as much as you can, if the data you need isn't available there, use your training.
-                                
+                                "content": f"""                                 
                                 🔹 **Retrieved Knowledge:**
                                 {retrieved_context}
                                 """,
