@@ -1,4 +1,3 @@
-
 import streamlit as st
 import time
 import random
@@ -7,7 +6,8 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Import aus components.password_training.password_training_utils
+# Import our utilities
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
 from components.password_training.password_training_utils import (
     evaluate_password_strength, generate_score_message, check_challenge_met,
     QUESTIONS, PASSWORD_CREATION_OPTIONS, PASSWORD_COMPARISON_OPTIONS,
@@ -18,25 +18,12 @@ from components.password_training.password_training_utils import (
     get_custom_css
 )
 
-
-# Page configuration
-st.set_page_config(
+# Use the common setup_page function instead of manual configuration
+setup_page(
     page_title="Password Creation Training",
-    page_icon="🔐",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-    menu_items={
-        'Get Help': None,
-        'Report a bug': None,
-        'About': None
-    }
+    icon_emoji="🔐",
+    subtitle="Complete this interactive training to learn how to create strong, secure passwords"
 )
-
-# Load custom CSS
-st.markdown(get_custom_css(), unsafe_allow_html=True)
-
-st.markdown('<div class="big-title">🔐 Password Creation Training</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Complete this interactive training to learn how to create strong, secure passwords</div>', unsafe_allow_html=True)
 
 # Initialize session state variables
 if "messages" not in st.session_state:

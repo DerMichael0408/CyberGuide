@@ -142,18 +142,7 @@ def main():
                 st.warning("Navigation error. Try clicking the task in the sidebar.")
             
         st.markdown("""
-        #### Task 3: Security Protocols
-        Learn essential security procedures and practices
-        """)
-        if st.button("Start Security Protocols ➡️", key="security_btn"):
-            try:
-                st.switch_page("pages/04_Task 4.py")
-            except Exception:
-                st.warning("Navigation error. Try clicking the task in the sidebar.")
-            
-    with tasks_col2:
-        st.markdown("""
-        #### Task 2: Phishing Awareness
+        #### Task 3: Phishing Awareness
         Learn to identify and report suspicious emails
         """)
         if st.button("Start Phishing Awareness ➡️", key="phishing_btn"):
@@ -161,17 +150,18 @@ def main():
                 st.switch_page("pages/05_Phishing.py")
             except Exception:
                 st.warning("Navigation error. Try clicking the task in the sidebar.")
-        
+            
+    with tasks_col2:
         st.markdown("""
-        #### Task 4: Model Management
-        Learn to download and manage AI models
+        #### Task 2: Social Engineering
+        Learn essential security procedures and practices
         """)
-        if st.button("Start Model Management ➡️", key="model_mgmt_btn"):
+        if st.button("Start Social Engineering ➡️", key="security_btn"):
             try:
-                st.switch_page("pages/06_Model Management.py")
+                st.switch_page("pages/04_Social Engineering.py")
             except Exception:
                 st.warning("Navigation error. Try clicking the task in the sidebar.")
-    
+        
     # Add task completion tracker
     st.markdown("<hr style='margin-top: 1.5rem; margin-bottom: 1.5rem;'>", unsafe_allow_html=True)
     
@@ -180,23 +170,22 @@ def main():
         completed_count = sum([
             st.session_state.get('task1_completed', False),
             st.session_state.get('task2_completed', False),
-            st.session_state.get('task3_completed', False),
-            st.session_state.get('task4_completed', False)
+            st.session_state.get('task3_completed', False)
         ])
         
         col1, col2 = st.columns([1, 3])
         with col1:
-            st.metric("Tasks Completed", f"{completed_count}/4")
+            st.metric("Tasks Completed", f"{completed_count}/3")
         
         with col2:
             # Progress bar
-            progress = completed_count / 4
+            progress = completed_count / 3
             st.progress(progress, text=f"Training progress: {int(progress * 100)}%")
             
-            if completed_count == 4:
+            if completed_count == 3:
                 st.success("🎉 Congratulations! You've completed all security tasks!")
             elif completed_count > 0:
-                st.info(f"Keep going! You've completed {completed_count} out of 4 tasks.")
+                st.info(f"Keep going! You've completed {completed_count} out of 3 tasks.")
             else:
                 st.warning("You haven't completed any tasks yet. Start with Task 1 above.")
     

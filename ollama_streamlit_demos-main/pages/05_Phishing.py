@@ -3,6 +3,7 @@ import ollama
 import re
 import time
 import os
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
 
 # Get the current page name from the file name
 def get_current_page():
@@ -24,100 +25,12 @@ messages_key = get_page_key("messages")
 question_number_key = get_page_key("question_number")
 started_key = get_page_key("started")
 
-# Set page config for wider layout and custom title/icon
-st.set_page_config(
+# Use the common setup_page function instead of manual configuration
+setup_page(
     page_title="Phishing Awareness Training",
-    page_icon="🛡️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    icon_emoji="🛡️",
+    subtitle="Learn to identify and report suspicious emails"
 )
-
-# Custom CSS for better styling - unchanged
-st.markdown("""
-<style>
-    .main {
-        padding: 2rem 3rem;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #4CAF50;
-    }
-    .stAlert {
-        border-radius: 10px;
-    }
-    .stExpander {
-        border-radius: 10px;
-        border: 1px solid #ddd;
-    }
-    .big-title {
-        font-size: 42px;
-        font-weight: 700;
-        margin-bottom: 10px;
-        color: #1E3A8A;
-        text-align: center;
-    }
-    .subtitle {
-        font-size: 18px;
-        margin-bottom: 30px;
-        text-align: center;
-        color: #666;
-    }
-    .email-container {
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        border-left: 5px solid #ff4757;
-        padding: 20px;
-        margin-bottom: 25px;
-        font-family: monospace;
-    }
-    .user-message {
-        background-color: #e6f3ff;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 5px 0;
-    }
-    .assistant-message {
-        background-color: #f0f0f0;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 5px 0;
-    }
-    .score-container {
-        background: linear-gradient(to right, #4CAF50, #2196F3);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        margin: 20px 0;
-    }
-    .question-number {
-        font-weight: bold;
-        color: #1E3A8A;
-    }
-    .feedback {
-        padding: 10px;
-        background-color: #f0f7ff;
-        border-left: 3px solid #2196F3;
-        margin-bottom: 10px;
-    }
-    .multiple-choice {
-        padding: 2px 0;
-        margin: 2px 0;
-    }
-    .multiple-choice-option {
-        display: block;
-        padding: 8px 12px;
-        margin: 5px 0;
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        border-left: 3px solid #6c757d;
-    }
-    .question-text {
-        font-size: 17px;
-        margin-bottom: 15px;
-        line-height: 1.5;
-    }
-</style>
-""", unsafe_allow_html=True)
 
 # Enhanced phishing email content - unchanged
 email_text = """

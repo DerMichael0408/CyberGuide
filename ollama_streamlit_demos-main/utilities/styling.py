@@ -308,11 +308,10 @@ def create_sidebar_tasks():
         completed_count = sum([
             st.session_state.get('task1_completed', False),
             st.session_state.get('task2_completed', False),
-            st.session_state.get('task3_completed', False),
-            st.session_state.get('task4_completed', False)
+            st.session_state.get('task3_completed', False)
         ])
         
-        st.markdown(f"**{completed_count}/4 Tasks Completed**")
+        st.markdown(f"**{completed_count}/3 Tasks Completed**")
         
         # Create a container with border to visually group tasks
         with st.container(border=True):
@@ -328,44 +327,32 @@ def create_sidebar_tasks():
                     st.error(f"Navigation error: {e}")
                     st.warning("Alternative path: Try clicking on pages/03_Password Creation")
             
-            # Task 2: Phishing Awareness Training
+            # Task 2: Social Engineering (moved from Task 3)
+            task3_completed = st.session_state.get('task3_completed', False)
+            icon2 = "✅" if task3_completed else "⏳"
+            label2 = f"{icon2} Task 2: Social Engineering"
+            if st.button(label2, key="sidebar_security_btn", use_container_width=True,
+                      help="Learn essential security protocols"):
+                try:
+                    st.switch_page("pages/04_Social Engineering.py")
+                except Exception as e:
+                    st.error(f"Navigation error: {e}")
+                    st.warning("Alternative path: Try clicking on pages/04_Social Engineering")
+            
+            # Task 3: Phishing Awareness (moved from Task 2)
             task2_completed = st.session_state.get('task2_completed', False)
-            icon2 = "✅" if task2_completed else "⏳"
-            label2 = f"{icon2} Task 2: Phishing Awareness"
-            if st.button(label2, key="sidebar_phishing_awareness_btn", use_container_width=True, 
+            icon3 = "✅" if task2_completed else "⏳"
+            label3 = f"{icon3} Task 3: Phishing Awareness"
+            if st.button(label3, key="sidebar_phishing_awareness_btn", use_container_width=True, 
                       help="Learn to identify and report suspicious emails"):
                 try:
                     st.switch_page("pages/05_Phishing.py")
                 except Exception as e:
                     st.error(f"Navigation error: {e}")
                     st.warning("Alternative path: Try clicking on pages/05_Phishing")
-            
-            # Task 3: Security Protocols
-            task3_completed = st.session_state.get('task3_completed', False)
-            icon3 = "✅" if task3_completed else "⏳"
-            label3 = f"{icon3} Task 3: Security Protocols"
-            if st.button(label3, key="sidebar_security_btn", use_container_width=True,
-                      help="Learn essential security protocols"):
-                try:
-                    st.switch_page("pages/04_Task 4.py")
-                except Exception as e:
-                    st.error(f"Navigation error: {e}")
-                    st.warning("Alternative path: Try clicking on pages/04_Task 4")
-            
-            # Task 4: Model Management
-            task4_completed = st.session_state.get('task4_completed', False)
-            icon4 = "✅" if task4_completed else "⏳"
-            label4 = f"{icon4} Task 4: Model Management"
-            if st.button(label4, key="sidebar_model_mgmt_btn", use_container_width=True,
-                      help="Learn to download and manage AI models"):
-                try:
-                    st.switch_page("pages/06_Model Management.py")
-                except Exception as e:
-                    st.error(f"Navigation error: {e}")
-                    st.warning("Alternative path: Try clicking on pages/06_Model Management")
         
         # Add a note explaining the tasks
-        st.caption("Complete all 4 tasks for your security certification")
+        st.caption("Complete all 3 tasks for your security certification")
         st.markdown("---")
 
 def create_sidebar_resources():

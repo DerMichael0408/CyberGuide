@@ -328,14 +328,13 @@ def create_next_task_buttons():
     if not task1:
         incomplete_tasks.append(("Password Creation", "/03_Password Creation"))
     
+    if not task3:
+        incomplete_tasks.append(("Social Engineering", "/04_Social Engineering"))
+    
     if not task2:
         incomplete_tasks.append(("Phishing Awareness", "/05_Phishing"))
     
-    if not task3:
-        incomplete_tasks.append(("Security Protocols", "/04_Task 4"))
-    
-    if not task4:
-        incomplete_tasks.append(("Model Management", "/06_Model Management"))
+    # Task 4 (Model Management) removed
         
     if incomplete_tasks:
         st.markdown("### Next Tasks")
