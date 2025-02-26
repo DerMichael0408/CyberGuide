@@ -749,21 +749,6 @@
         "Recognize that phishing attempts can masquerade as surveys or feedback requests.",
         "Learn to verify the legitimacy of unexpected information requests before sharing details."
       ]
-    },
-    {
-	      "id": 51,
-      "title": "Suspicious chicken nuggets",
-      "description": "You receive 67 chicken nuggets in the mail. You didn't expect that so you're curious as to why",
-      "tasks": [
-        "Review the sender.",
-        "Avoid eating the chicken.",
-        "Go to McDonald's as soon as you can."
-      ],
-      "solution": "Do not eat the chickens under any circumstance.",
-      "learning_objectives": [
-        "Recognize that not all nuggets are safe.",
-        "Learn to verify tthe nugget sender."
-      ]
     }
   ]
 }
