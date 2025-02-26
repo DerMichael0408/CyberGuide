@@ -5,25 +5,19 @@ import random
 import sys
 import os
 
-sys.path.append(os.path.abspath("pages"))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Import all components from the utility file
-from password_training_utils import (
-    # Password evaluation functions
+# Import aus components.password_training.password_training_utils
+from components.password_training.password_training_utils import (
     evaluate_password_strength, generate_score_message, check_challenge_met,
-    
-    # Training data
     QUESTIONS, PASSWORD_CREATION_OPTIONS, PASSWORD_COMPARISON_OPTIONS,
     CORRECT_ANSWERS, PASSWORD_CHALLENGES, PASSWORD_FACTS,
     get_achievements, calculate_points,
-    
-    # UI components
     format_message, format_multiple_choice, generate_score_html,
     generate_certificate_html, generate_question_feedback,
-    
-    # Styles
     get_custom_css
 )
+
 
 # Page configuration
 st.set_page_config(
