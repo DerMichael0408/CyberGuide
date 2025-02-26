@@ -3,6 +3,7 @@ import streamlit as st
 import os
 from openai import OpenAI
 from utilities.icon import page_icon
+from utilities.rag import retrieve_context
 
 st.set_page_config(
     page_title="CyberGuide",
@@ -81,33 +82,77 @@ def main():
         with message_container.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
+
     if prompt := st.chat_input("Enter a prompt here..."):
         try:
             # Add user message to page-specific chat history
-            st.session_state[messages_key].append(
-                {"role": "user", "content": prompt})
-
+            st.session_state[messages_key].append({"role": "user", "content": prompt})
             message_container.chat_message("user", avatar="😎").markdown(prompt)
+
+            # 🔍 Retrieve relevant cybersecurity knowledge from RAG
+            most_relevant, retrieved_context = retrieve_context(prompt)
+
+            # 🌟 Show the most relevant retrieved chunk prominently
+            with st.container():
+                st.markdown("### 📌 Most Relevant Retrieved Information")
+                st.info(most_relevant)
+
+            # 🔎 Debugging: Show full retrieved context in an expander
+            with st.expander("🔍 **All Retrieved Cybersecurity Context**", expanded=False):
+                st.info("\n\n".join(retrieved_context))
 
             with message_container.chat_message("assistant", avatar="🤖"):
                 with st.spinner("model working..."):
                     stream = client.chat.completions.create(
                         model=selected_model,
                         messages=[
-                            {"role": m["role"], "content": m["content"]}
-                            for m in st.session_state[messages_key]  # Use page-specific messages
+                            {
+                                "role": "system",
+                                "content": f"""                                 
+                                🔹 **Retrieved Knowledge:** {most_relevant}
+                                """,
+                            },
+                            {"role": "user", "content": prompt},  # ✅ User query is separate!
                         ],
                         stream=True,
                     )
-                # stream response
+
+                # Stream response and store it
                 response = st.write_stream(stream)
-            
+
             # Add assistant response to page-specific chat history
-            st.session_state[messages_key].append(
-                {"role": "assistant", "content": response})
+            st.session_state[messages_key].append({"role": "assistant", "content": response})
 
         except Exception as e:
-            st.error(e, icon="⛔️")
+            st.error(e, icon="⛔️")            
+
+    # if prompt := st.chat_input("Enter a prompt here..."):
+    #     try:
+    #         # Add user message to page-specific chat history
+    #         st.session_state[messages_key].append(
+    #             {"role": "user", "content": prompt})
+
+    #         message_container.chat_message("user", avatar="😎").markdown(prompt)
+
+    #         with message_container.chat_message("assistant", avatar="🤖"):
+    #             with st.spinner("model working..."):
+    #                 stream = client.chat.completions.create(
+    #                     model=selected_model,
+    #                     messages=[
+    #                         {"role": m["role"], "content": m["content"]}
+    #                         for m in st.session_state[messages_key]  # Use page-specific messages
+    #                     ],
+    #                     stream=True,
+    #                 )
+    #             # stream response
+    #             response = st.write_stream(stream)
+            
+    #         # Add assistant response to page-specific chat history
+    #         st.session_state[messages_key].append(
+    #             {"role": "assistant", "content": response})
+
+    #     except Exception as e:
+    #         st.error(e, icon="⛔️")
 
 
 if __name__ == "__main__":
