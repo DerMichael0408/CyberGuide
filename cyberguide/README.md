@@ -14,10 +14,6 @@ CyberGuide is an interactive cybersecurity assistant that provides expert guidan
 Before running CyberGuide, ensure you have Python installed on your machine. Then, follow these steps:
 
 ```bash
-git clone https://github.com/yourusername/cyberguide.git
-```
-
-```bash
 cd cyberguide
 ```
 
@@ -55,23 +51,5 @@ Navigate to the URL provided by Streamlit in your browser (typically http://loca
 3. **Review Retrieved Information**: CyberGuide will display the most relevant information it found in its knowledge base
 4. **Get Expert Guidance**: The AI will provide cybersecurity advice based on its model and the retrieved information
 
-## Troubleshooting
+## Members
 
-If you encounter the "Directory 'static/' does not exist" error with PyMuPDF:
-
-```bash
-pip uninstall pymupdf fitz frontend
-pip install PyPDF2
-```
-
-Then replace the PyMuPDF imports with PyPDF2 in the `rag.py` file.
-
-## Contributing
-
-Interested in contributing to CyberGuide?
-- We welcome contributions from everyone.
-- Feel free to open an issue or submit a pull request.
-
-## License
-
-[Insert your license information here]
