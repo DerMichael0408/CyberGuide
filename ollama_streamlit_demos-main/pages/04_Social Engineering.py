@@ -499,10 +499,34 @@ with col1:
                 # Add to message history
                 st.session_state[messages_key].append({"role": "assistant", "content": final_score})
                 
-                #Update all_chat with local chat history
+                # Update all_chat with local chat history
                 if "all_chats" not in st.session_state:
                     st.session_state["all_chats"] = {}
                 st.session_state["all_chats"][current_page] = st.session_state[messages_key]
+                
+                # Initialize scenario_scores if it doesn't exist
+                if "scenario_scores" not in st.session_state:
+                    st.session_state.scenario_scores = {
+                        "phishing": {"score": 0, "completed": False},
+                        "password": {"score": 0, "completed": False},
+                        "social": {"score": 0, "completed": False}
+                    }
+                
+                # Only increment completed_number if social scenario wasn't already completed
+                if score_match and not st.session_state.scenario_scores["social"]["completed"]:
+                    # Initialize completed_number if it doesn't exist
+                    if "completed_number" not in st.session_state:
+                        st.session_state.completed_number = 0
+                    
+                    # Increment the completed scenarios counter
+                    st.session_state.completed_number += 1
+                
+                # Update the score and mark as completed
+                if score_match:
+                    st.session_state.scenario_scores["social"] = {
+                        "score": score_num,
+                        "completed": True
+                    }
                 
                 # Update progress to show 5/5
                 with col2:
@@ -541,9 +565,6 @@ with col1:
                     progress_percent = min(st.session_state[question_number_key] * 20, 100)
                     st.write(f"**Progress: {question_display}/5 questions**")
                     st.progress(progress_percent)
-                if "completed_number" not in st.session_state:
-                    st.session_state.completed_number = 0  # Set a default value
-                st.session_state.completed_number = st.session_state.completed_number + 1
 
 # Reset button (only show in completed state)
 if st.session_state.get(question_number_key, 0) == 5:

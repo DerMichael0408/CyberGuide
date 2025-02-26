@@ -1,4 +1,3 @@
-
 import streamlit as st
 import time
 import random
@@ -89,8 +88,12 @@ with col2:
     
     # Show progress
     if st.session_state.question_index > 0:
-        st.write(f"**Progress: {st.session_state.question_index}/5 questions**")
-        progress = st.progress(min(st.session_state.question_index * 20, 100))
+        # Calculate progress percentage
+        progress_percent = min(st.session_state.question_index * 20, 100)
+        question_display = min(st.session_state.question_index, 5)
+        
+        st.write(f"**Progress: {question_display}/5 questions**")
+        progress = st.progress(progress_percent)
     
     # Show a random password fact
     with st.expander("💡 Did you know?", expanded=False):
@@ -204,14 +207,51 @@ with col1:
                 
                 # Add to message history
                 st.session_state.messages.append({"role": "assistant", "content": final_score})
+                
                 st.session_state.training_complete = True
                 
                 # Update progress to 100%
-                if "progress" in locals():
-                    progress.progress(100)
+                with col2:
+                    st.write("**Progress: 5/5 questions**")
+                    st.progress(100)
                 
                 # Success message and download option
                 st.success("🎓 Training completed successfully! Remember to apply these principles to all your accounts.")
+                
+                # Save chat history to all_chats
+                if "all_chats" not in st.session_state:
+                    st.session_state.all_chats = {}
+                
+                # Get current page name
+                current_page = os.path.basename(__file__).split('.')[0]
+                st.session_state.all_chats[current_page] = st.session_state.messages
+                
+                # Initialize scenario_scores if it doesn't exist
+                if "scenario_scores" not in st.session_state:
+                    st.session_state.scenario_scores = {
+                        "phishing": {"score": 0, "completed": False},
+                        "password": {"score": 0, "completed": False},
+                        "social": {"score": 0, "completed": False}
+                    }
+                
+                # Convert points to a score out of 100
+                # Assuming max possible points is around 350-400
+                normalized_score = min(round((points / 350) * 100), 100)
+                
+                # Only increment completed_number if password scenario wasn't already completed
+                if not st.session_state.scenario_scores["password"]["completed"]:
+                    # Initialize completed_number if it doesn't exist
+                    if "completed_number" not in st.session_state:
+                        st.session_state.completed_number = 0
+                    
+                    # Increment the completed scenarios counter
+                    st.session_state.completed_number += 1
+                
+                # Update the score and mark as completed
+                st.session_state.scenario_scores["password"] = {
+                    "score": normalized_score,
+                    "completed": True
+                }
                 
                 st.download_button(
                     label="📜 Download Password Security Cheat Sheet",
