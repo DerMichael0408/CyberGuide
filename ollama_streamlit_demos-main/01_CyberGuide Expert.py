@@ -83,20 +83,67 @@ def main():
         with message_container.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
+    # if prompt := st.chat_input("Enter a prompt here..."):
+    #     try:
+    #         # Add user message to page-specific chat history
+    #         st.session_state[messages_key].append(
+    #             {"role": "user", "content": prompt})
+
+    #         message_container.chat_message("user", avatar="😎").markdown(prompt)
+
+    #         # 🔍 Retrieve relevant cybersecurity knowledge from RAG
+    #         retrieved_context = retrieve_context(prompt)
+
+    #         # 🔎 Debugging: Show retrieved context in the UI
+    #         with st.expander("🔍 **Retrieved Cybersecurity Context**", expanded=False):
+    #             st.info(retrieved_context)
+
+    #         with message_container.chat_message("assistant", avatar="🤖"):
+    #             with st.spinner("model working..."):
+    #                 stream = client.chat.completions.create(
+    #                     model=selected_model,
+    #                     messages=[
+    #                         {
+    #                             "role": "system",
+    #                             "content": f"""                                 
+    #                             🔹 **Retrieved Knowledge:**
+    #                             {retrieved_context}
+    #                             """,
+    #                         },
+    #                         {"role": "user", "content": prompt},  # ✅ Keep user input separate!
+    #                     ],
+    #                     stream=True,
+    #                 )
+
+    #             # Stream response and store it
+    #             response = st.write_stream(stream)
+
+            
+    #         # Add assistant response to page-specific chat history
+    #         st.session_state[messages_key].append(
+    #             {"role": "assistant", "content": response})
+
+    #     except Exception as e:
+    #         st.error(e, icon="⛔️")
+
+
     if prompt := st.chat_input("Enter a prompt here..."):
         try:
             # Add user message to page-specific chat history
-            st.session_state[messages_key].append(
-                {"role": "user", "content": prompt})
-
+            st.session_state[messages_key].append({"role": "user", "content": prompt})
             message_container.chat_message("user", avatar="😎").markdown(prompt)
 
             # 🔍 Retrieve relevant cybersecurity knowledge from RAG
-            retrieved_context = retrieve_context(prompt)
+            most_relevant, retrieved_context = retrieve_context(prompt)
 
-            # 🔎 Debugging: Show retrieved context in the UI
-            with st.expander("🔍 **Retrieved Cybersecurity Context**", expanded=False):
-                st.info(retrieved_context)
+            # 🌟 Show the most relevant retrieved chunk prominently
+            with st.container():
+                st.markdown("### 📌 Most Relevant Retrieved Information")
+                st.info(most_relevant)
+
+            # 🔎 Debugging: Show full retrieved context in an expander
+            with st.expander("🔍 **All Retrieved Cybersecurity Context**", expanded=False):
+                st.info("\n\n".join(retrieved_context))
 
             with message_container.chat_message("assistant", avatar="🤖"):
                 with st.spinner("model working..."):
@@ -106,11 +153,10 @@ def main():
                             {
                                 "role": "system",
                                 "content": f"""                                 
-                                🔹 **Retrieved Knowledge:**
-                                {retrieved_context}
+                                🔹 **Retrieved Knowledge:** {most_relevant}
                                 """,
                             },
-                            {"role": "user", "content": prompt},  # ✅ Keep user input separate!
+                            {"role": "user", "content": prompt},  # ✅ User query is separate!
                         ],
                         stream=True,
                     )
@@ -118,10 +164,8 @@ def main():
                 # Stream response and store it
                 response = st.write_stream(stream)
 
-            
             # Add assistant response to page-specific chat history
-            st.session_state[messages_key].append(
-                {"role": "assistant", "content": response})
+            st.session_state[messages_key].append({"role": "assistant", "content": response})
 
         except Exception as e:
             st.error(e, icon="⛔️")
