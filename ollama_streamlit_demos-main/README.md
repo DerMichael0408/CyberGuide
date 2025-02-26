@@ -1,64 +1,77 @@
-# 🚀 Ollama x Streamlit Playground
+# 🛡️ CyberGuide
 
-This project demonstrates how to run and manage models locally using [Ollama](https://ollama.com/) by creating an interactive UI with [Streamlit](https://streamlit.io).
-
-The app has a page for running chat-based models and also one for nultimodal models (_llava and bakllava_) for vision.
-
-## App in Action
-
-![GIF](assets/ollama_streamlit.gif)
-
-**Check out the video tutorial 👇**
-
-<a href="https://youtu.be/bAI_jWsLhFM">
-  <img src="https://img.youtube.com/vi/bAI_jWsLhFM/hqdefault.jpg" alt="Watch the video" width="100%">
-</a>
+CyberGuide is an interactive cybersecurity assistant that provides expert guidance and information using locally run AI models through [Ollama](https://ollama.com/) with a user-friendly interface built with [Streamlit](https://streamlit.io).
 
 ## Features
 
-- **Interactive UI**: Utilize Streamlit to create a user-friendly interface.
-- **Local Model Execution**: Run your Ollama models locally without the need for external APIs.
-- **Real-time Responses**: Get real-time responses from your models directly in the UI.
+- **Interactive Cybersecurity Expert**: Get guidance on cybersecurity topics through a chat interface
+- **Local Model Execution**: Run AI models locally for privacy and security using Ollama
+- **RAG Implementation**: Leverages Retrieval-Augmented Generation with cybersecurity knowledge base
+- **Real-time Responses**: Receive instant cybersecurity advice directly in the UI
 
 ## Installation
 
-Before running the app, ensure you have Python installed on your machine. Then, clone this repository and install the required packages using pip:
+Before running CyberGuide, ensure you have Python installed on your machine. Then, follow these steps:
 
 ```bash
-git clone https://github.com/tonykipkemboi/ollama_streamlit_demos.git
+git clone https://github.com/yourusername/cyberguide.git
 ```
 
 ```bash
-cd ollama_streamlit_demos
+cd cyberguide
 ```
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
+### Additional Setup
 
-To start the app, run the following command in your terminal:
+1. Install [Ollama](https://ollama.com/) on your system
+2. Pull a compatible language model using Ollama CLI:
 
 ```bash
-streamlit run 01_💬_Chat_Demo.py
+ollama pull llama2 # or another model of your choice
 ```
 
-Navigate to the URL provided by Streamlit in your browser to interact with the app.
+3. Make sure you have the required cybersecurity knowledge base files:
+   - Place `Petra_logistics.pdf` in your project root
+   - Place `CybersecurityScenarios.json` in your project root
 
-**NB: Make sure you have downloaded [Ollama](https://ollama.com/) to your system.**
+## Usage
+
+To start CyberGuide, run the following command in your terminal:
+
+```bash
+streamlit run 01_CyberGuide\ Expert.py
+```
+
+Navigate to the URL provided by Streamlit in your browser (typically http://localhost:8501) to interact with CyberGuide.
+
+### How to Use CyberGuide
+
+1. **Select a Model**: Choose from available local models in the dropdown menu
+2. **Ask Security Questions**: Type your cybersecurity queries in the chat input
+3. **Review Retrieved Information**: CyberGuide will display the most relevant information it found in its knowledge base
+4. **Get Expert Guidance**: The AI will provide cybersecurity advice based on its model and the retrieved information
+
+## Troubleshooting
+
+If you encounter the "Directory 'static/' does not exist" error with PyMuPDF:
+
+```bash
+pip uninstall pymupdf fitz frontend
+pip install PyPDF2
+```
+
+Then replace the PyMuPDF imports with PyPDF2 in the `rag.py` file.
 
 ## Contributing
 
-Interested in contributing to this app?
-
-- Great!
-- I welcome contributions from everyone.
-
-Got questions or suggestions?
-
+Interested in contributing to CyberGuide?
+- We welcome contributions from everyone.
 - Feel free to open an issue or submit a pull request.
 
-## Acknowledgments
+## License
 
-👏 Kudos to the [Ollama](https://ollama.com/) team for their efforts in making open-source models more accessible!
+[Insert your license information here]
