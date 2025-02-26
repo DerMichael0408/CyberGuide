@@ -213,6 +213,10 @@ if "recommendations" not in st.session_state:
         "Follow these suggestions to enhance your security practices"
     ]
 
+# Track the number of completed scenarios for analysis purposes
+if "last_analyzed_count" not in st.session_state:
+    st.session_state.last_analyzed_count = 0
+
 # Calculate overall score based on completed scenarios
 def calculate_overall_score():
     scores = []
@@ -291,11 +295,17 @@ def analyze_chats_with_llm():
 
 # Get the user data from session state
 def get_user_data():
-    # Try to analyze chats if completed scenarios > 0 and we haven't analyzed yet
-    if st.session_state.completed_number > 0 and "analysis_performed" not in st.session_state:
+    # Analyze chats if completed scenarios > 0 AND either:
+    # 1. We haven't analyzed yet (analysis_performed doesn't exist), OR
+    # 2. The number of completed scenarios has increased since last analysis
+    if (st.session_state.completed_number > 0 and 
+        (("analysis_performed" not in st.session_state) or 
+         (st.session_state.completed_number > st.session_state.last_analyzed_count))):
+        
         success = analyze_chats_with_llm()
         if success:
             st.session_state.analysis_performed = True
+            st.session_state.last_analyzed_count = st.session_state.completed_number
     
     # Calculate overall score
     overall_score = calculate_overall_score()
