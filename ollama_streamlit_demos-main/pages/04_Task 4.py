@@ -1,24 +1,30 @@
 import streamlit as st
 import ollama
 from time import sleep
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
 from utilities.icon import page_icon
 
-st.set_page_config(
-    page_title="Task 3: USB stick",
-    page_icon="3️⃣",
-    layout="wide",
-    initial_sidebar_state="expanded",
+# Use the common setup_page function instead of manual configuration
+setup_page(
+    page_title="Security Protocols",
+    icon_emoji="🔒",
+    skip_header=True
 )
 
-
 def main():
-    page_icon("3️⃣")
     role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
-    st.subheader(f"Task 3: USB Security{role_suffix}", divider="red", anchor=False)
+    st.subheader(f"Task 3: Security Protocols{role_suffix}", divider="red", anchor=False)
 
-    st.subheader("Download Models", anchor=False)
+    # Show task completion status 
+    show_task_completion_status(3)
+    
+    st.subheader("Security Model Downloads", anchor=False)
+    st.markdown("""
+    As part of your security training, you'll need to download security models 
+    that can help identify potential threats and vulnerabilities.
+    """)
     model_name = st.text_input(
-        "Enter the name of the model to download ↓", placeholder="mistral"
+        "Enter the name of the security model to download ↓", placeholder="mistral"
     )
     if st.button(f"📥 :green[**Download**] :red[{model_name}]"):
         if model_name:
@@ -79,6 +85,10 @@ SYSTEM You are mario from super mario bros.""",
                 try:
                     ollama.delete(model)
                     st.success(f"Deleted model: {model}", icon="🎉")
+                    
+                    # Mark task as complete when user successfully deletes a model
+                    mark_task_complete(3)
+                    
                     st.balloons()
                     sleep(1)
                     st.rerun()
