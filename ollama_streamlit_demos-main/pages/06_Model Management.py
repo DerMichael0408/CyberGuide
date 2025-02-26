@@ -1,29 +1,41 @@
 import streamlit as st
 import ollama
 from time import sleep
-from utilities.icon import page_icon
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
 
-st.set_page_config(
-    page_title="Model management",
-    page_icon="⚙️",
-    layout="wide",
-    initial_sidebar_state="expanded",
+# Use the template setup function for consistent styling and sidebar
+setup_page(
+    page_title="Model Management",
+    icon_emoji="🤖",
+    skip_header=True
 )
 
-
 def main():
-    page_icon("⚙️")
-    st.subheader("Model Management", divider="red", anchor=False)
+    role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
+    st.subheader(f"Task 4: Model Management{role_suffix}", divider="red", anchor=False)
+
+    # Show task completion status at the top
+    show_task_completion_status(4)
+    
+    st.markdown("""
+    As a security professional, understanding AI model management is crucial for deploying 
+    secure AI solutions. This task will teach you the basics of model management using Ollama.
+    """)
 
     st.subheader("Download Models", anchor=False)
     model_name = st.text_input(
         "Enter the name of the model to download ↓", placeholder="mistral"
     )
+    
     if st.button(f"📥 :green[**Download**] :red[{model_name}]"):
         if model_name:
             try:
                 ollama.pull(model_name)
                 st.success(f"Downloaded model: {model_name}", icon="🎉")
+                
+                # Mark task as complete
+                mark_task_complete(4)
+                
                 st.balloons()
                 sleep(1)
                 st.rerun()
