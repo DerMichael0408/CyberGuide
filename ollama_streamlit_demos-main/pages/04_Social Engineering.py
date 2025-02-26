@@ -466,7 +466,7 @@ with col1:
         if st.session_state[question_number_key] == 5:  # This is the answer to Question 5
             with st.spinner("Conducting scientific assessment of your social engineering awareness..."):
                 # For visual effect, add a short delay
-                time.sleep(1.5)
+                #time.sleep(0.25)
                 
                 # Generate final score with scientific assessment
                 final_score_messages = st.session_state[messages_key] + [{"role": "system", "content": SCORING_INSTRUCTIONS}]
@@ -512,7 +512,7 @@ with col1:
             # Generate AI response for the next question
             with st.spinner("Analyzing your response..."):
                 # For visual effect, add a short delay
-                time.sleep(0.5)
+                #time.sleep(0.25)
                 
                 # Get response from LLM
                 response = ollama.chat(model="llava:latest", messages=st.session_state[messages_key])
@@ -536,10 +536,15 @@ with col1:
                     progress_percent = min(st.session_state[question_number_key] * 20, 100)
                     st.write(f"**Progress: {question_display}/5 questions**")
                     st.progress(progress_percent)
+                if "completed_number" not in st.session_state:
+                    st.session_state.completed_number = 0  # Set a default value
+                st.session_state.completed_number = st.session_state.completed_number + 1
 
 # Reset button (only show in completed state)
 if st.session_state.get(question_number_key, 0) == 5:
+    
     with col1:
+        
         if st.button("🔄 Start New Training"):
             # Reset all page-specific session state variables
             st.session_state[messages_key] = []

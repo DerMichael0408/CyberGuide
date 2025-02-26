@@ -169,11 +169,14 @@ st.markdown("""
 
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = "Accountant Department"  # Set a default value
+    
+if "completed_number" not in st.session_state:
+        st.session_state.completed_number = 0  # Set a default value
 
 # Mock data for demonstration - In a real app, this would come from a database
 def get_user_data():
     return {
-        "name": "Michael Schmidt",
+        "name": "User",
         "email": "michael.schmidt@example.com",
         "department": st.session_state.selected_role,
         "completed_date": datetime.now().strftime("%B %d, %Y"),
@@ -345,12 +348,13 @@ with col3:
     </div>
     """, unsafe_allow_html=True)
 
+
 with col4:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-title">SCENARIOS COMPLETED</div>
         <div class="metric-value" style="color: #3B82F6;">
-            4/4
+            """ + str(st.session_state.completed_number) + """/4
         </div>
         <span style="color: #10B981; font-weight: bold;">✓ All Complete</span>
     </div>
