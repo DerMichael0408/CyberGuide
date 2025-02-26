@@ -6,12 +6,13 @@ from io import BytesIO
 import json
 import ollama
 from utilities.icon import page_icon
+from utilities.template import setup_page
 
-st.set_page_config(
-    page_title="Task 1",
-    page_icon="1️⃣",
-    layout="wide",
-    initial_sidebar_state="expanded",
+# Use the common setup_page function instead of manual configuration
+setup_page(
+    page_title="Multi-Modal",
+    icon_emoji="🖼️",
+    subtitle="Image Analysis"
 )
 
 
@@ -43,7 +44,6 @@ def get_allowed_model_names(models_info: dict) -> tuple:
 
 def main():
     
-    page_icon("1️⃣")
     role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
     st.subheader(f"Task 1: Phishing{role_suffix}", divider="red", anchor=False)
     
