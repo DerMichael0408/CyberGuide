@@ -499,6 +499,11 @@ with col1:
                 # Add to message history
                 st.session_state[messages_key].append({"role": "assistant", "content": final_score})
                 
+                #Update all_chat with local chat history
+                if "all_chats" not in st.session_state:
+                    st.session_state["all_chats"] = {}
+                st.session_state["all_chats"][current_page] = st.session_state[messages_key]
+                
                 # Update progress to show 5/5
                 with col2:
                     st.write(f"**Progress: 5/5 questions**")

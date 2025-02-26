@@ -413,7 +413,7 @@ if user_input:
     if st.session_state[question_number_key] == 4:  # This is the answer to Question 5
         with st.spinner("Conducting scientific assessment of your phishing awareness..."):
             # For visual effect, add a short delay
-            time.sleep(1.5)
+            #time.sleep(1.5)
             
             # Generate final score with scientific assessment
             final_score_messages = st.session_state[messages_key] + [{"role": "system", "content": SCORING_INSTRUCTIONS}]
@@ -446,6 +446,12 @@ if user_input:
             # Add to message history
             st.session_state[messages_key].append({"role": "assistant", "content": final_score})
             
+            #Update all_chat with local chat history
+            if "all_chats" not in st.session_state:
+                st.session_state["all_chats"] = {}
+            st.session_state["all_chats"][current_page] = st.session_state[messages_key]
+            #print(st.session_state["all_chats"])    
+            
             # Update progress to show 5/5
             with col2:
                 st.write(f"**Progress: 5/5 questions**")
@@ -459,7 +465,7 @@ if user_input:
         # Generate AI response for the next question
         with st.spinner("Analyzing your response..."):
             # For visual effect, add a short delay
-            time.sleep(0.5)
+            #time.sleep(0.5)
             
             # Get response from LLM
             response = ollama.chat(model="llava:latest", messages=st.session_state[messages_key])
