@@ -167,12 +167,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+if "selected_role" not in st.session_state:
+    st.session_state.selected_role = "Accountant Department"  # Set a default value
+
 # Mock data for demonstration - In a real app, this would come from a database
 def get_user_data():
     return {
         "name": "Michael Schmidt",
         "email": "michael.schmidt@example.com",
-        "department": "Finance",
+        "department": st.session_state.selected_role,
         "completed_date": datetime.now().strftime("%B %d, %Y"),
         "overall_score": 76,
         "scenarios": [
