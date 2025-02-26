@@ -263,6 +263,32 @@ def create_sidebar_header():
     Create the header section of the sidebar with proper navigation
     """
     with st.sidebar:
+        # Add welcome message if user has submitted their name and role
+        if ('name_submitted' in st.session_state and st.session_state.name_submitted and 
+            'selected_role' in st.session_state and st.session_state.selected_role):
+            
+            # Get user info
+            first_name = st.session_state.first_name
+            role = st.session_state.selected_role
+            
+            # Check current theme
+            is_dark_mode = st.session_state.get('theme_mode', 'Light') == 'Dark'
+            
+            # Create a subtle welcome message with dark mode support
+            bg_color = "rgba(20, 20, 25, 0.2)" if is_dark_mode else "rgba(49, 51, 63, 0.05)"
+            text_color = "#e0e0e0" if is_dark_mode else "inherit"
+            highlight_color = "#80b0ff" if is_dark_mode else "#4169E1"
+            
+            st.markdown(
+                f"""
+                <div style="padding: 10px; border-radius: 5px; background-color: {bg_color}; 
+                margin-bottom: 15px; font-size: 0.9rem; color: {text_color};">
+                    Welcome {first_name}, you are assigned to <span style="color: {highlight_color};">{role}</span>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        
         st.markdown("### CyberGuide")
         st.markdown("Your interactive security training tool")
         

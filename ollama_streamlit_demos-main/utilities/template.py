@@ -264,9 +264,8 @@ def show_task_completion_status(task_id=None):
     task1 = st.session_state.get("task1_completed", False)  # Password Creation
     task2 = st.session_state.get("task2_completed", False)  # Phishing Awareness
     task3 = st.session_state.get("task3_completed", False)  # Phishing
-    task4 = st.session_state.get("task4_completed", False)  # Security Protocols
     
-    total_completed = sum([task1, task2, task3, task4])
+    total_completed = sum([task1, task2, task3])
     
     # If a specific task_id is provided, show status for that task
     if task_id is not None:
@@ -279,9 +278,6 @@ def show_task_completion_status(task_id=None):
         elif task_id == 3:
             is_completed = task3
             task_name = "Security Protocols"
-        elif task_id == 4:
-            is_completed = task4
-            task_name = "Model Management"
         else:
             st.warning(f"Invalid task ID: {task_id}")
             return
@@ -291,19 +287,23 @@ def show_task_completion_status(task_id=None):
         return
         
     # Otherwise, show the overall summary (original behavior)
-    progress_text = f"Tasks completed: {total_completed}/4"
-    progress_percentage = total_completed / 4
+    progress_text = f"Tasks completed: {total_completed}/3"
+    progress_percentage = total_completed / 3
     
     st.progress(progress_percentage, text=progress_text)
     
-    if total_completed == 4:
+    if total_completed == 3:
         st.success("Congratulations! You've completed all security tasks!", icon="🎉")
     elif total_completed == 0:
         st.info("Get started with your security training by completing the tasks")
     
-    # Check if role is selected, which is now a prerequisite rather than a task
+    # Check if prerequisites are completed
+    has_name = 'name_submitted' in st.session_state and st.session_state.name_submitted is not None
     has_role = 'selected_role' in st.session_state and st.session_state.selected_role is not None
-    if not has_role:
+    
+    if not has_name:
+        st.warning("Don't forget to enter your name on the Welcome page!")
+    elif not has_role:
         st.warning("Don't forget to select your role on the Welcome page!")
     
     return total_completed
@@ -318,9 +318,13 @@ def create_next_task_buttons():
     task3 = st.session_state.get('task3_completed', False)
     task4 = st.session_state.get('task4_completed', False)
     has_role = 'selected_role' in st.session_state and st.session_state.selected_role
+    has_name = 'name_submitted' in st.session_state and st.session_state.name_submitted
     
     # Calculate remaining tasks
     incomplete_tasks = []
+    
+    if not has_name:
+        incomplete_tasks.append(("Enter Your Name", "/00_Welcome"))
     
     if not has_role:
         incomplete_tasks.append(("Set Your Role", "/00_Welcome"))
@@ -350,7 +354,7 @@ def create_next_task_buttons():
                         st.warning(f"Alternative path: Try clicking on pages{task_path}")
     
     # If all tasks are complete, show dashboard button
-    if task1 and task2 and task3 and task4 and has_role:
+    if task1 and task2 and task3 and has_role and has_name:
         st.success("All tasks completed! 🎉")
         if st.button("View Your Dashboard", use_container_width=True):
             try:

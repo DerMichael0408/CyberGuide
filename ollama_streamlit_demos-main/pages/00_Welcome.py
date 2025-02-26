@@ -57,8 +57,62 @@ def main():
     Learn to identify and respond to common security threats in a safe, guided environment.
     """)
     
+    # Name input (added before role selection)
+    st.subheader("👤 Your Information", anchor=False, divider="gray")
+    
+    # Initialize session state for names
+    if 'first_name' not in st.session_state:
+        st.session_state.first_name = ""
+    if 'last_name' not in st.session_state:
+        st.session_state.last_name = ""
+    if 'name_submitted' not in st.session_state:
+        st.session_state.name_submitted = False
+    
+    # Display current name if submitted
+    if st.session_state.name_submitted:
+        with st.container(border=True):
+            st.success(f"✅ **Name Submitted:** {st.session_state.first_name} {st.session_state.last_name}")
+            
+            # Button to change name
+            if st.button("Change Name", use_container_width=True, key="change_name_btn", 
+                       help="Click to update your name"):
+                st.session_state.name_submitted = False
+                st.rerun()
+    
+    # Show name input if not submitted
+    else:
+        st.info("Please enter your name to begin")
+        
+        col1, col2, col3 = st.columns([2, 2, 1])
+        with col1:
+            first_name = st.text_input("First Name", value=st.session_state.first_name, key="first_name_input")
+            
+        with col2:
+            last_name = st.text_input("Last Name", value=st.session_state.last_name, key="last_name_input")
+        
+        with col3:
+            st.markdown("<br>", unsafe_allow_html=True)
+            submit_button_disabled = not (first_name and last_name)
+            if st.button("✅ Submit", use_container_width=True, key="submit_name_btn", 
+                       disabled=submit_button_disabled,
+                       help="Click to confirm your name"):
+                if first_name and last_name:
+                    st.session_state.first_name = first_name
+                    st.session_state.last_name = last_name
+                    st.session_state.name_submitted = True
+                    st.success(f"Name set to: {first_name} {last_name}")
+                    st.rerun()
+                else:
+                    st.error("Please enter both first and last name")
+    
     # Role selection (moved from being a task to an initial setup)
     st.subheader("👤 Select Your Role", anchor=False, divider="gray")
+    
+    # Role selection should only be enabled if name is submitted
+    role_section_disabled = not st.session_state.name_submitted
+    
+    if role_section_disabled:
+        st.warning("Please enter your name above before selecting a role")
     
     # Initialize session state
     if 'selected_role' not in st.session_state:
@@ -86,8 +140,8 @@ def main():
                 st.markdown(f"### Role Security Profile")
                 st.markdown(ROLE_DESCRIPTIONS[role]['detailed'])
 
-    # Show role selection if no role is selected
-    else:
+    # Show role selection if no role is selected and name is submitted
+    elif st.session_state.name_submitted:
         st.info("Select your organizational role to receive tailored security guidance")
         
         col1, col2 = st.columns([3, 1])
