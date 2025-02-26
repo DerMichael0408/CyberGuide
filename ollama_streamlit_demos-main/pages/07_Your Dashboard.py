@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import altair as alt
 from datetime import datetime
 import time
+import ollama
+import json
 
 # Set page config for wider layout and custom title/icon
 st.set_page_config(
@@ -150,9 +152,6 @@ st.markdown("""
     .badge-social {
         background-color: #EC4899;
     }
-    .badge-incident {
-        background-color: #F59E0B;
-    }
     .progress-wrapper {
         height: 10px;
         background-color: #E5E7EB;
@@ -164,96 +163,225 @@ st.markdown("""
         height: 100%;
         border-radius: 5px;
     }
+    .insight-card {
+        background-color: #f8fafc;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 15px;
+        border-left: 3px solid #3B82F6;
+    }
 </style>
 """, unsafe_allow_html=True)
 
+# Initialize session state variables if they don't exist
 if "selected_role" not in st.session_state:
     st.session_state.selected_role = "Accountant Department"  # Set a default value
     
 if "completed_number" not in st.session_state:
-        st.session_state.completed_number = 0  # Set a default value
+    st.session_state.completed_number = 0  # Set a default value
 
-# Mock data for demonstration - In a real app, this would come from a database
+if "scenario_scores" not in st.session_state:
+    # Default scores if none are available yet
+    st.session_state.scenario_scores = {
+        "phishing": {"score": 0, "completed": False},
+        "password": {"score": 0, "completed": False},
+        "social": {"score": 0, "completed": False}
+    }
+
+if "all_chats" not in st.session_state:
+    st.session_state.all_chats = {}
+
+# Ensure we have default strengths, weaknesses and recommendations
+if "strengths" not in st.session_state:
+    st.session_state.strengths = [
+        "Complete a scenario to see your strengths",
+        "Strengths will be identified based on your responses",
+        "Each completed scenario improves your security profile"
+    ]
+
+if "weaknesses" not in st.session_state:
+    st.session_state.weaknesses = [
+        "Complete a scenario to see areas for improvement",
+        "Weaknesses will be identified based on your responses",
+        "Focus on these areas to strengthen your security posture"
+    ]
+
+if "recommendations" not in st.session_state:
+    st.session_state.recommendations = [
+        "Complete a scenario to receive personalized recommendations",
+        "Recommendations will address your specific security needs",
+        "Follow these suggestions to enhance your security practices"
+    ]
+
+# Calculate overall score based on completed scenarios
+def calculate_overall_score():
+    scores = []
+    for scenario, data in st.session_state.scenario_scores.items():
+        if data["completed"]:
+            scores.append(data["score"])
+    
+    if not scores:
+        return 0
+    return int(sum(scores) / len(scores))
+
+# Helper function to analyze chat history using LLM
+def analyze_chats_with_llm():
+    if len(st.session_state.all_chats) == 0:
+        return False
+    
+    # Prepare chat history for analysis
+    chat_summary = ""
+    for scenario, messages in st.session_state.all_chats.items():
+        chat_summary += f"\n\n--- {scenario} SCENARIO ---\n"
+        
+        # Extract only relevant messages (user responses and AI feedback)
+        for msg in messages:
+            if msg["role"] == "user" and not "Let's start" in msg["content"]:
+                chat_summary += f"User: {msg['content']}\n"
+            elif msg["role"] == "assistant" and ("score" in msg["content"].lower() or "assessment" in msg["content"].lower()):
+                chat_summary += f"Assessment: {msg['content']}\n"
+    
+    # Prepare prompt for LLM analysis
+    system_prompt = """
+    You are a cybersecurity training analyst. Analyze the user's responses to cybersecurity scenarios and provide:
+    1. Three specific strengths demonstrated by the user
+    2. Three specific areas for improvement 
+    3. Three personalized recommendations
+    
+    Format your response EXACTLY as a JSON object with three arrays:
+    {
+        "strengths": ["strength 1", "strength 2", "strength 3"],
+        "weaknesses": ["weakness 1", "weakness 2", "weakness 3"],
+        "recommendations": ["recommendation 1", "recommendation 2", "recommendation 3"]
+    }
+    
+    Each entry should be a complete sentence that is specific, actionable, and based on evidence from the user's responses.
+    """
+    
+    user_prompt = f"Here is the chat history from security training scenarios. Please analyze it and provide strengths, weaknesses, and recommendations:\n\n{chat_summary}"
+    
+    try:
+        # Call the LLM for analysis
+        response = ollama.chat(model="llava:latest", messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ])
+        
+        # Extract and parse the JSON response
+        content = response["message"]["content"]
+        # Find JSON content within the response
+        json_start = content.find('{')
+        json_end = content.rfind('}') + 1
+        
+        if json_start >= 0 and json_end > json_start:
+            json_content = content[json_start:json_end]
+            analysis = json.loads(json_content)
+            
+            # Update session state with the analysis
+            st.session_state.strengths = analysis.get("strengths", st.session_state.strengths)
+            st.session_state.weaknesses = analysis.get("weaknesses", st.session_state.weaknesses)
+            st.session_state.recommendations = analysis.get("recommendations", st.session_state.recommendations)
+            
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"Error analyzing chats: {e}")
+        return False
+
+# Get the user data from session state
 def get_user_data():
+    # Try to analyze chats if completed scenarios > 0 and we haven't analyzed yet
+    if st.session_state.completed_number > 0 and "analysis_performed" not in st.session_state:
+        success = analyze_chats_with_llm()
+        if success:
+            st.session_state.analysis_performed = True
+    
+    # Calculate overall score
+    overall_score = calculate_overall_score()
+    
+    # Prepare scenario data
+    scenarios = []
+    scenario_map = {
+        "phishing": {
+            "name": "Phishing Awareness",
+            "badge": "badge-phishing",
+            "color": "#3B82F6",
+            "areas": {
+                "Identification": 0,
+                "Response": 0,
+                "Prevention": 0
+            }
+        },
+        "password": {
+            "name": "Password Security",
+            "badge": "badge-password",
+            "color": "#8B5CF6",
+            "areas": {
+                "Password Strength": 0,
+                "Password Management": 0,
+                "Multi-Factor Authentication": 0
+            }
+        },
+        "social": {
+            "name": "Social Engineering",
+            "badge": "badge-social",
+            "color": "#EC4899",
+            "areas": {
+                "Awareness": 0,
+                "Detection": 0,
+                "Response": 0
+            }
+        }
+    }
+    
+    # Populate scenario data with actual scores
+    for key, details in scenario_map.items():
+        data = st.session_state.scenario_scores.get(key, {"score": 0, "completed": False})
+        score = data.get("score", 0)
+        completed = data.get("completed", False)
+        
+        # Generate random area scores based on overall scenario score if completed
+        if completed:
+            areas = {}
+            for area_key in details["areas"].keys():
+                # Randomize a bit while keeping close to overall score
+                area_score = max(min(score + np.random.randint(-15, 15), 100), 0)
+                areas[area_key] = area_score
+        else:
+            areas = details["areas"]
+        
+        scenarios.append({
+            "name": details["name"],
+            "score": score,
+            "badge": details["badge"],
+            "areas": areas,
+            "color": details["color"],
+            "completed": completed
+        })
+    
+    # Sort scenarios by score for determining strongest/weakest
+    completed_scenarios = [s for s in scenarios if s["completed"]]
+    if completed_scenarios:
+        strongest_scenario = max(completed_scenarios, key=lambda x: x["score"])
+        weakest_scenario = min(completed_scenarios, key=lambda x: x["score"])
+    else:
+        strongest_scenario = {"name": "Not available", "score": 0}
+        weakest_scenario = {"name": "Not available", "score": 0}
+    
     return {
         "name": "User",
         "email": "michael.schmidt@example.com",
         "department": st.session_state.selected_role,
         "completed_date": datetime.now().strftime("%B %d, %Y"),
-        "overall_score": 76,
-        "scenarios": [
-            {
-                "name": "Phishing Awareness",
-                "score": 82,
-                "badge": "badge-phishing",
-                "areas": {
-                    "Identification": 85,
-                    "Response": 80,
-                    "Prevention": 70
-                },
-                "color": "#3B82F6"
-            },
-            {
-                "name": "Password Security",
-                "score": 65,
-                "badge": "badge-password",
-                "areas": {
-                    "Password Strength": 60,
-                    "Password Management": 75,
-                    "Multi-Factor Authentication": 55
-                },
-                "color": "#8B5CF6"
-            },
-            {
-                "name": "Social Engineering",
-                "score": 90,
-                "badge": "badge-social",
-                "areas": {
-                    "Awareness": 95,
-                    "Detection": 85,
-                    "Response": 90
-                },
-                "color": "#EC4899"
-            },
-            {
-                "name": "Incident Response",
-                "score": 70,
-                "badge": "badge-incident",
-                "areas": {
-                    "Identification": 65,
-                    "Containment": 75,
-                    "Recovery": 70,
-                    "Reporting": 60
-                },
-                "color": "#F59E0B"
-            }
-        ],
-        "strengths": [
-            "Strong ability to recognize social engineering attempts",
-            "Good understanding of phishing email indicators",
-            "Effective knowledge of security incident escalation procedures"
-        ],
-        "weaknesses": [
-            "Password management practices need improvement",
-            "Limited understanding of multi-factor authentication benefits",
-            "Incident reporting procedures need more attention"
-        ],
-        "recommendations": [
-            "Enroll in the password management workshop next month",
-            "Enable MFA on all company accounts as soon as possible",
-            "Review the incident response protocol documentation",
-            "Schedule a 1:1 session with the security team for personalized guidance"
-        ],
-        "training_history": [
-            {"date": "2023-10-15", "name": "Security Basics", "score": 72},
-            {"date": "2023-11-20", "name": "Email Security", "score": 78},
-            {"date": "2024-01-10", "name": "Data Protection", "score": 81},
-            {"date": "2024-02-25", "name": "Cyber Threats", "score": 76}
-        ]
+        "overall_score": overall_score,
+        "scenarios": scenarios,
+        "strongest_scenario": strongest_scenario,
+        "weakest_scenario": weakest_scenario,
+        "strengths": st.session_state.strengths,
+        "weaknesses": st.session_state.weaknesses,
+        "recommendations": st.session_state.recommendations
     }
-
-# Get user data
-user_data = get_user_data()
 
 # Helper functions
 def get_score_class(score):
@@ -297,6 +425,9 @@ def create_radar_chart(scenario_data):
     
     return fig
 
+# Get user data
+user_data = get_user_data()
+
 # Display dashboard header
 st.markdown('<div class="big-title">🛡️ CyberGuard Security Dashboard</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Your personalized cybersecurity performance overview</div>', unsafe_allow_html=True)
@@ -331,9 +462,9 @@ with col2:
     <div class="metric-card">
         <div class="metric-title">STRONGEST AREA</div>
         <div class="metric-value" style="color: #10B981;">
-            {max(user_data["scenarios"], key=lambda x: x["score"])["name"]}
+            {user_data["strongest_scenario"]["name"]}
         </div>
-        <span class="score-badge score-high">{max(user_data["scenarios"], key=lambda x: x["score"])["score"]}/100</span>
+        <span class="score-badge score-high">{user_data["strongest_scenario"]["score"]}/100</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -342,21 +473,22 @@ with col3:
     <div class="metric-card">
         <div class="metric-title">NEEDS IMPROVEMENT</div>
         <div class="metric-value" style="color: #EF4444;">
-            {min(user_data["scenarios"], key=lambda x: x["score"])["name"]}
+            {user_data["weakest_scenario"]["name"]}
         </div>
-        <span class="score-badge score-low">{min(user_data["scenarios"], key=lambda x: x["score"])["score"]}/100</span>
+        <span class="score-badge score-low">{user_data["weakest_scenario"]["score"]}/100</span>
     </div>
     """, unsafe_allow_html=True)
-
 
 with col4:
     st.markdown(f"""
     <div class="metric-card">
         <div class="metric-title">SCENARIOS COMPLETED</div>
         <div class="metric-value" style="color: #3B82F6;">
-            """ + str(st.session_state.completed_number) + """/4
+            {st.session_state.completed_number}/3
         </div>
-        <span style="color: #10B981; font-weight: bold;">✓ All Complete</span>
+        <span style="color: {'#10B981' if st.session_state.completed_number == 3 else '#F59E0B'}; font-weight: bold;">
+            {'✓ All Complete' if st.session_state.completed_number == 3 else f'{3 - st.session_state.completed_number} Remaining'}
+        </span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -369,36 +501,40 @@ with col1:
     st.markdown('<div class="section-title">Scenario Performance</div>', unsafe_allow_html=True)
     
     # Create a DataFrame for the scenarios
-    scenario_df = pd.DataFrame({
-        'Scenario': [s['name'] for s in user_data['scenarios']],
-        'Score': [s['score'] for s in user_data['scenarios']],
-        'Color': [s['color'] for s in user_data['scenarios']]
-    })
-    
-    # Create a horizontal bar chart
-    chart = alt.Chart(scenario_df).mark_bar().encode(
-        x=alt.X('Score:Q', scale=alt.Scale(domain=[0, 100])),
-        y=alt.Y('Scenario:N', sort='-x'),
-        color=alt.Color('Color:N', scale=None),
-        tooltip=['Scenario', 'Score']
-    ).properties(
-        height=200
-    )
-    
-    # Add text labels
-    text = chart.mark_text(
-        align='left',
-        baseline='middle',
-        dx=3,
-        color='white',
-        fontSize=14,
-        fontWeight='bold'
-    ).encode(
-        text='Score:Q'
-    )
-    
-    # Combine chart and text
-    st.altair_chart(chart + text, use_container_width=True)
+    completed_scenarios = [s for s in user_data["scenarios"] if s["completed"]]
+    if completed_scenarios:
+        scenario_df = pd.DataFrame({
+            'Scenario': [s['name'] for s in completed_scenarios],
+            'Score': [s['score'] for s in completed_scenarios],
+            'Color': [s['color'] for s in completed_scenarios]
+        })
+        
+        # Create a horizontal bar chart
+        chart = alt.Chart(scenario_df).mark_bar().encode(
+            x=alt.X('Score:Q', scale=alt.Scale(domain=[0, 100])),
+            y=alt.Y('Scenario:N', sort='-x'),
+            color=alt.Color('Color:N', scale=None),
+            tooltip=['Scenario', 'Score']
+        ).properties(
+            height=200
+        )
+        
+        # Add text labels
+        text = chart.mark_text(
+            align='left',
+            baseline='middle',
+            dx=3,
+            color='white',
+            fontSize=14,
+            fontWeight='bold'
+        ).encode(
+            text='Score:Q'
+        )
+        
+        # Combine chart and text
+        st.altair_chart(chart + text, use_container_width=True)
+    else:
+        st.info("Complete scenarios to see your performance. Each scenario assesses different cybersecurity skills.")
     
     # Individual scenario details
     st.markdown('<div class="section-title">Detailed Analysis</div>', unsafe_allow_html=True)
@@ -406,19 +542,36 @@ with col1:
     # Create two columns for the radar charts
     radar_col1, radar_col2 = st.columns(2)
     
-    with radar_col1:
-        # First radar chart
-        st.pyplot(create_radar_chart(user_data["scenarios"][0]))
-        st.write("")  # Spacer
-        # Third radar chart
-        st.pyplot(create_radar_chart(user_data["scenarios"][2]))
+    # Check which scenarios are completed
+    completed_scenarios_dict = {s["name"]: s for s in user_data["scenarios"] if s["completed"]}
+    
+    # Show radar charts for completed scenarios
+    if len(completed_scenarios_dict) > 0:
+        scenario_count = 0
+        for scenario in user_data["scenarios"]:
+            if scenario["completed"]:
+                col = radar_col1 if scenario_count % 2 == 0 else radar_col2
+                with col:
+                    st.pyplot(create_radar_chart(scenario))
+                    if scenario_count < len(completed_scenarios_dict) - 1:
+                        st.write("")  # Spacer
+                scenario_count += 1
+    else:
+        with radar_col1:
+            st.info("Complete scenarios to see detailed analysis of your performance in specific security areas.")
         
-    with radar_col2:
-        # Second radar chart
-        st.pyplot(create_radar_chart(user_data["scenarios"][1]))
-        st.write("")  # Spacer
-        # Fourth radar chart
-        st.pyplot(create_radar_chart(user_data["scenarios"][3]))
+        with radar_col2:
+            st.markdown("""
+            <div class="insight-card">
+                <h4>What does this measure?</h4>
+                <p>Each scenario evaluates different aspects of cybersecurity awareness:</p>
+                <ul>
+                    <li><b>Phishing Awareness:</b> Identifying and responding to phishing attempts</li>
+                    <li><b>Password Security:</b> Creating and managing secure passwords</li>
+                    <li><b>Social Engineering:</b> Recognizing and handling social engineering tactics</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
 
 # Right column - Strengths, Weaknesses, Recommendations
 with col2:
@@ -437,24 +590,57 @@ with col2:
     for recommendation in user_data["recommendations"]:
         st.markdown(f'<div class="recommendation-item">→ {recommendation}</div>', unsafe_allow_html=True)
     
-    # Training history
-    st.markdown('<div class="section-title">Training History</div>', unsafe_allow_html=True)
+    # Security insights section to replace training history
+    st.markdown('<div class="section-title">Security Insights</div>', unsafe_allow_html=True)
     
-    # Create a DataFrame for training history
-    history_df = pd.DataFrame(user_data["training_history"])
-    history_df['date'] = pd.to_datetime(history_df['date'])
-    history_df = history_df.sort_values('date')
-    
-    # Create a line chart for training progress
-    line_chart = alt.Chart(history_df).mark_line(point=True).encode(
-        x=alt.X('date:T', title='Date'),
-        y=alt.Y('score:Q', scale=alt.Scale(domain=[50, 100]), title='Score'),
-        tooltip=['name', 'date', 'score']
-    ).properties(
-        height=200
-    )
-    
-    st.altair_chart(line_chart, use_container_width=True)
+    # Check if any scenarios are completed
+    if st.session_state.completed_number > 0:
+        # Create a simple gauge chart
+        score = user_data["overall_score"]
+        fig, ax = plt.subplots(figsize=(6, 2))
+        
+        # Define the gauge
+        ax.barh([0], [100], height=0.5, color='#EFF6FF')
+        ax.barh([0], [score], height=0.5, color='#10B981' if score >= 80 else '#F59E0B' if score >= 60 else '#EF4444')
+        
+        # Add labels
+        ax.text(0, 0, '0', ha='center', va='center', fontsize=10)
+        ax.text(50, 0, '50', ha='center', va='center', fontsize=10)
+        ax.text(100, 0, '100', ha='center', va='center', fontsize=10)
+        ax.text(score, -0.5, f'{score}', ha='center', va='center', fontsize=12, fontweight='bold')
+        
+        # Clean up the chart
+        ax.set_xlim(0, 100)
+        ax.set_ylim(-1, 1)
+        ax.set_yticks([])
+        ax.set_xticks([])
+        ax.set_frame_on(False)
+        
+        st.pyplot(fig)
+        
+        # Add interpretation
+        if score >= 80:
+            status = "Strong"
+            color = "#10B981"
+            interpretation = "You demonstrate excellent security awareness. Continue practicing these skills."
+        elif score >= 60:
+            status = "Moderate"
+            color = "#F59E0B"
+            interpretation = "You have a good foundation but could benefit from additional training in certain areas."
+        else:
+            status = "Needs Improvement"
+            color = "#EF4444"
+            interpretation = "Your security awareness requires significant development. Focus on the recommendations provided."
+        
+        st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 15px;">
+            <span style="font-size: 18px; font-weight: bold; color: {color};">Security Status: {status}</span>
+        </div>
+        <p>{interpretation}</p>
+        """, unsafe_allow_html=True)
+        
+    else:
+        st.info("Complete at least one security scenario to see your performance insights and security status.")
 
 # Call to action section
 st.write("")  # Spacer
@@ -499,19 +685,31 @@ with col3:
 st.write("")  # Spacer
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
-    st.markdown("""
-    <div style="text-align: center; padding: 20px; border: 2px dashed #3B82F6; border-radius: 10px; margin-top: 20px;">
-        <h3 style="color: #1E3A8A;">🏆 CyberGuard Security Certified</h3>
-        <p>You've completed all required security training modules. Your certification is valid until March 2025.</p>
-        <button style="background-color: #1E3A8A; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
-            View Certificate
-        </button>
-    </div>
-    """, unsafe_allow_html=True)
+    if st.session_state.completed_number == 3:
+        st.markdown("""
+        <div style="text-align: center; padding: 20px; border: 2px dashed #3B82F6; border-radius: 10px; margin-top: 20px;">
+            <h3 style="color: #1E3A8A;">🏆 CyberGuard Security Certified</h3>
+            <p>You've completed all required security training modules. Your certification is valid until March 2025.</p>
+            <button style="background-color: #1E3A8A; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                View Certificate
+            </button>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        remaining = 3 - st.session_state.completed_number
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px; border: 2px dashed #6B7280; border-radius: 10px; margin-top: 20px;">
+            <h3 style="color: #6B7280;">🏆 CyberGuard Security Certification</h3>
+            <p>Complete {remaining} more scenario{'s' if remaining > 1 else ''} to earn your security certification.</p>
+            <div style="background-color: #F3F4F6; padding: 8px 16px; border-radius: 5px; display: inline-block;">
+                {st.session_state.completed_number}/3 Scenarios Completed
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Footer with last update info
 st.markdown("""
 <div style="text-align: center; margin-top: 30px; color: #666; font-size: 12px;">
-    Dashboard last updated: February 25, 2025 • Next assessment due: May 25, 2025
+    Dashboard last updated: February 26, 2025 • Next assessment due: May 26, 2025
 </div>
 """, unsafe_allow_html=True)

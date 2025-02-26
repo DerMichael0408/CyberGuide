@@ -446,12 +446,48 @@ if user_input:
             # Add to message history
             st.session_state[messages_key].append({"role": "assistant", "content": final_score})
             
-            #Update all_chat with local chat history
+            # Update all_chat with local chat history
             if "all_chats" not in st.session_state:
                 st.session_state["all_chats"] = {}
-            st.session_state["all_chats"][current_page] = st.session_state[messages_key]   
+            st.session_state["all_chats"][current_page] = st.session_state[messages_key]
             
-            # Update progress to show 5/5
+            # Initialize scenario_scores if it doesn't exist
+            if "scenario_scores" not in st.session_state:
+                st.session_state.scenario_scores = {
+                    "phishing": {"score": 0, "completed": False},
+                    "password": {"score": 0, "completed": False},
+                    "social": {"score": 0, "completed": False}
+                }
+            
+            # Get the scenario type from the current page
+            scenario_type = current_page.lower()
+            if "phish" in scenario_type:
+                scenario_key = "phishing"
+            elif "password" in scenario_type:
+                scenario_key = "password"
+            elif "social" in scenario_type:
+                scenario_key = "social"
+            else:
+                scenario_key = scenario_type  # Fallback to page name
+            
+            # Update the scenario scores with the result
+            if score_match:
+                # Only increment completed_number if this scenario wasn't already completed
+                if not st.session_state.scenario_scores[scenario_key]["completed"]:
+                    # Initialize completed_number if it doesn't exist
+                    if "completed_number" not in st.session_state:
+                        st.session_state.completed_number = 0
+                    
+                    # Increment the completed scenarios counter
+                    st.session_state.completed_number += 1
+                
+                # Update the score and mark as completed
+                st.session_state.scenario_scores[scenario_key] = {
+                    "score": score_num,
+                    "completed": True
+                }
+            
+            # Update progress to show 5/5 (not 4/5)
             with col2:
                 st.write(f"**Progress: 5/5 questions**")
                 st.progress(100)
