@@ -123,9 +123,9 @@ def main():
         st.markdown("""
         ### Recommended Models
         
-        - **Deepseek**: Best for detailed technical analysis and complex security concepts
-        - **Llama 3**: Great for general explanations and interactive training
-        - **Mistral**: Excellent for concise answers and quick security assessments
+        - **qwen2.5**: Works well with retrieved infromation. Moderate thinking duration before answering.
+        - **llava**: Great for general explanations. Tends to give short and concise answers. Short thinking duration before answering.
+        - **Mistral**: Good alternative for the other models mentioned. Moderate thinking duration before answering.
         
         These models must be installed via Ollama before use.
         """)
