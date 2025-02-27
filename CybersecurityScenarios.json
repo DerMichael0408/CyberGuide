@@ -1,0 +1,754 @@
+{
+  "scenarios": [
+    {
+      "id": 1,
+      "title": "Phishing Email Alert",
+      "description": "You receive an email that appears to come from a trusted company but contains suspicious links and unexpected requests for personal or work-related information.",
+      "tasks": [
+        "Review the email content for potential red flags (e.g., urgent language, spelling mistakes, or mismatched sender address).",
+        "Decide whether to interact with any links or attachments.",
+        "Follow the internal procedure for reporting suspicious emails."
+      ],
+      "solution": "Identify the suspicious elements in the email, do not click on any links or attachments, and immediately report the email to IT/security as per the established process. This prevents potential breaches and protects sensitive company data by ensuring prompt response and investigation.",
+      "learning_objectives": [
+        "Recognize common signs of phishing.",
+        "Understand the proper process for reporting suspicious emails."
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Secure Password Challenge",
+      "description": "Your company has announced a mandatory password update. The system requires you to create a strong password that meets the new security guidelines.",
+      "tasks": [
+        "Review the current password’s strength.",
+        "Follow the guidelines for creating a strong password.",
+        "Decide on a new password that avoids common words and predictable patterns."
+      ],
+      "solution": "Evaluate your current password, then create a new one using a mix of uppercase and lowercase letters, numbers, and special characters, ensuring it does not contain easily guessable sequences. This approach strengthens account security and minimizes the risk of unauthorized access.",
+      "learning_objectives": [
+        "Learn what makes a password strong and secure.",
+        "Understand the importance of regular password updates."
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Infected Device Response",
+      "description": "Your computer starts acting unusually—slow performance, unexpected pop-ups, and odd file behavior—which might indicate a malware infection or early ransomware attack.",
+      "tasks": [
+        "Assess the symptoms on your device.",
+        "Decide on the immediate action to take.",
+        "Follow the company’s incident reporting procedure."
+      ],
+      "solution": "Immediately disconnect the device from the network, avoid interacting with suspicious files, and report the incident to IT/security following the established protocol. Acting quickly limits the spread of potential malware and ensures that experts can investigate and mitigate the threat.",
+      "learning_objectives": [
+        "Recognize early signs of a potential infection.",
+        "Know the critical steps to minimize damage and involve the experts."
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Suspicious USB Discovery",
+      "description": "You find an unmarked USB drive in a common area of the office or parking lot.",
+      "tasks": [
+        "Examine the situation to decide if you should use the drive.",
+        "Follow the training on handling unknown external devices.",
+        "Determine the proper reporting procedure."
+      ],
+      "solution": "Do not plug the USB drive into any device and immediately report its discovery to IT so it can be safely handled and analyzed. This procedure minimizes the risk of inadvertently introducing malware into your system.",
+      "learning_objectives": [
+        "Understand the risks of using unknown external devices.",
+        "Learn the proper procedures for handling and reporting potential security threats."
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Social Media Confidentiality",
+      "description": "While posting on social media, you accidentally share a screenshot or details that include sensitive company information.",
+      "tasks": [
+        "Review your social media post for any sensitive data before publishing.",
+        "Decide if the post needs to be edited or removed.",
+        "Follow the reporting procedure for accidental disclosures."
+      ],
+      "solution": "Immediately remove or edit the post to eliminate any sensitive information, and notify your supervisor and IT/security team about the incident. This action helps limit the spread of confidential data and reinforces the importance of vigilance when sharing online.",
+      "learning_objectives": [
+        "Recognize the importance of safeguarding confidential information online.",
+        "Learn the steps to mitigate accidental disclosures on public platforms."
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Home Network Security for Remote Work",
+      "description": "Working from home, you discover that your Wi-Fi network is set to an outdated security protocol and uses a default router password.",
+      "tasks": [
+        "Review your home network settings.",
+        "Follow the guidelines for updating Wi-Fi security.",
+        "Decide whether to use the company VPN for sensitive work."
+      ],
+      "solution": "Access your router settings, update the Wi-Fi encryption (preferably to WPA3), change the default router password to a strong, unique one, and use the company’s VPN when accessing sensitive data. This ensures your home network meets the security standards required for remote work.",
+      "learning_objectives": [
+        "Understand basic home network security measures.",
+        "Learn how to protect company data while working remotely."
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Unattended Workstation Alert",
+      "description": "You step away from your desk for a break or meeting and forget to lock your computer.",
+      "tasks": [
+        "Check whether you have locked your workstation before leaving.",
+        "Follow the guidelines for securing an unattended device.",
+        "Decide on actions if you return to an unlocked workstation."
+      ],
+      "solution": "Always lock your workstation before leaving your desk, and if you notice it unlocked upon your return, check for any unauthorized activity and report if necessary. This proactive measure helps prevent unauthorized access to your computer.",
+      "learning_objectives": [
+        "Understand the importance of locking your device to prevent unauthorized access.",
+        "Reinforce best practices for securing unattended devices."
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Accidental Email Attachment Sharing",
+      "description": "You accidentally attach the wrong document to an email, sending sensitive company information to an unintended recipient.",
+      "tasks": [
+        "Review the email and its attachments before sending.",
+        "Decide what to do immediately after realizing the error.",
+        "Follow the procedure for reporting such mistakes."
+      ],
+      "solution": "Contact the unintended recipient to request deletion of the email and attachment, and promptly notify IT/security to initiate the proper incident response. This ensures that the sensitive data is not further disseminated and that corrective actions are documented.",
+      "learning_objectives": [
+        "Learn the importance of double-checking recipients and attachments before sending.",
+        "Understand the steps to mitigate accidental data disclosure."
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Lost Mobile Device",
+      "description": "While commuting, you realize that your company-issued smartphone is missing.",
+      "tasks": [
+        "Assess the situation to determine if the device can be located.",
+        "Decide on the immediate actions to secure the device data.",
+        "Follow the company’s protocol for reporting lost devices."
+      ],
+      "solution": "Use available tracking tools to locate the device, immediately report the loss to IT to initiate remote lock/wipe procedures, and change passwords for any sensitive accounts accessed via the device. Acting swiftly helps prevent unauthorized access and minimizes potential data breaches.",
+      "learning_objectives": [
+        "Understand the protocol for reporting lost or stolen devices.",
+        "Recognize the importance of prompt action to protect sensitive information."
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Suspicious Phone Call (Vishing)",
+      "description": "You receive a phone call from someone claiming to be from IT support who asks for your login credentials to 'resolve an urgent issue.'",
+      "tasks": [
+        "Evaluate the authenticity of the call.",
+        "Decide whether to share any sensitive information over the phone.",
+        "Follow the established procedure for verifying such calls."
+      ],
+      "solution": "Do not provide any personal or login information; instead, independently verify the caller’s identity by contacting IT directly using a known, trusted number. This helps prevent social engineering attacks and ensures your credentials remain secure.",
+      "learning_objectives": [
+        "Recognize phone-based social engineering tactics (vishing).",
+        "Learn how to verify and appropriately respond to suspicious calls."
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Fake IT Support Email",
+      "description": "An email appears to come from your IT department urging you to click a link to update your security software.",
+      "tasks": [
+        "Examine the email carefully before interacting with it.",
+        "Decide if the email matches the company’s communication style.",
+        "Follow the procedure for verifying suspicious emails."
+      ],
+      "solution": "Do not click on any links or provide any information until you confirm the email’s legitimacy; forward the email to the official IT support address for verification. This ensures you do not fall victim to phishing scams and that the incident is documented for further review.",
+      "learning_objectives": [
+        "Learn to distinguish between genuine and fraudulent IT communications.",
+        "Practice safe handling of unexpected security-related emails."
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Outdated Software Notification",
+      "description": "A pop-up appears on your computer prompting an 'urgent' software update that you don’t recall scheduling.",
+      "tasks": [
+        "Review the pop-up to assess its authenticity.",
+        "Decide whether the update request is legitimate.",
+        "Follow the company procedure for software updates."
+      ],
+      "solution": "Avoid clicking the pop-up immediately; verify the update with IT and then use the official company channels to install any required updates. This approach prevents potential malware installations and ensures your system remains secure.",
+      "learning_objectives": [
+        "Understand that unexpected update prompts might be malicious.",
+        "Learn to verify updates through trusted sources before proceeding."
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Risks of Public Wi-Fi",
+      "description": "While working remotely from a coffee shop or airport, you notice that the public Wi-Fi network is unsecured.",
+      "tasks": [
+        "Review the security of the public Wi-Fi network before accessing sensitive data.",
+        "Decide whether to use the network for work-related tasks.",
+        "Follow guidelines for connecting securely in public spaces."
+      ],
+      "solution": "Avoid accessing sensitive company information on an unsecured network; instead, connect through a trusted VPN to ensure data security. This not only protects your information but also aligns with best practices for remote work security.",
+      "learning_objectives": [
+        "Recognize the risks associated with public Wi-Fi networks.",
+        "Learn the importance of using secure connections and VPNs for remote work."
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Accidental Data Disclosure on Social Media",
+      "description": "You post a photo or status update that inadvertently reveals sensitive company information (such as a screenshot with confidential details).",
+      "tasks": [
+        "Review the content of your post for accidental disclosures.",
+        "Decide whether the post should be edited or removed.",
+        "Follow the procedure for reporting accidental data exposure."
+      ],
+      "solution": "Immediately remove or edit the post to eliminate sensitive data, and report the incident to your supervisor and IT/security team. This prompt action minimizes exposure and reinforces the need for careful review before sharing information online.",
+      "learning_objectives": [
+        "Understand the importance of reviewing content before sharing it on social platforms.",
+        "Learn how to quickly mitigate accidental data disclosures online."
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Suspicious Software Installation",
+      "description": "You notice a new program on your computer that you don’t remember installing—possibly bundled with another download.",
+      "tasks": [
+        "Review the list of installed programs for unfamiliar software.",
+        "Decide whether the software should be executed.",
+        "Follow the reporting procedure for suspicious software installations."
+      ],
+      "solution": "Do not run or interact with the unfamiliar software and report the anomaly to IT for further investigation. This response helps prevent potential security breaches and ensures that any malicious software is promptly addressed.",
+      "learning_objectives": [
+        "Recognize the risks of unauthorized software installations.",
+        "Understand the steps to take if unexpected software appears on your device."
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Unexpected Printer Behavior",
+      "description": "The office printer suddenly starts printing documents without any clear request, which could indicate an unauthorized access attempt.",
+      "tasks": [
+        "Observe the printer for any unusual activity.",
+        "Decide whether this behavior aligns with normal printer operations.",
+        "Follow the procedure for reporting device anomalies."
+      ],
+      "solution": "Immediately inform the IT support team with details such as time and any error messages, and avoid handling any printed documents that might contain sensitive information. This ensures that any potential breach is quickly investigated and mitigated.",
+      "learning_objectives": [
+        "Learn to identify unusual behavior in shared devices as a potential security incident.",
+        "Understand the importance of promptly reporting anomalies to protect company data."
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Shoulder Surfing Risk",
+      "description": "While working in an open-plan office or public space, you notice someone trying to look over your shoulder as you enter sensitive information.",
+      "tasks": [
+        "Be aware of your surroundings when entering confidential data.",
+        "Decide if you need to shield your screen.",
+        "Follow the guidelines for maintaining privacy in public spaces."
+      ],
+      "solution": "Shield your screen by adjusting your seating or using a privacy filter, ask the person to give you space if necessary, and report any persistent behavior to your supervisor. These actions help protect your data from prying eyes and reinforce a culture of security awareness.",
+      "learning_objectives": [
+        "Understand the risk of shoulder surfing.",
+        "Learn techniques to protect your screen and maintain privacy."
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Unattended Sensitive Documents",
+      "description": "You discover printed documents containing confidential information left unattended in a common area.",
+      "tasks": [
+        "Review the area for unattended sensitive documents.",
+        "Decide if the documents are secured according to company guidelines.",
+        "Follow the procedure for handling confidential physical documents."
+      ],
+      "solution": "Secure the documents by placing them in a locked drawer or designated confidential bin, and notify the document owner or your supervisor immediately. This prevents unauthorized access and ensures that sensitive information is properly safeguarded.",
+      "learning_objectives": [
+        "Recognize the importance of handling sensitive physical documents securely.",
+        "Understand the need for proper disposal and storage procedures."
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Suspicious QR Code",
+      "description": "A promotional poster with a QR code appears around the office, promising rewards but potentially linking to a malicious site.",
+      "tasks": [
+        "Review the QR code and its source before scanning.",
+        "Decide whether to scan the QR code based on its legitimacy.",
+        "Follow the procedure for verifying digital content."
+      ],
+      "solution": "Do not scan the QR code until its legitimacy is confirmed by IT; check with a colleague or supervisor to see if the campaign is official. Verifying the QR code helps protect against potential malware and phishing attacks.",
+      "learning_objectives": [
+        "Learn the risks associated with scanning unknown QR codes.",
+        "Understand the importance of verifying promotional materials."
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Public Conversation Exposure",
+      "description": "You realize that discussing work-related topics in a public place might allow bystanders to overhear sensitive information.",
+      "tasks": [
+        "Assess the privacy of the location before discussing confidential matters.",
+        "Decide whether to continue the conversation in the current setting.",
+        "Follow the best practices for maintaining confidentiality in public."
+      ],
+      "solution": "Move to a private area to continue the conversation and be discreet when discussing sensitive topics. This minimizes the risk of accidental information leakage and protects company data.",
+      "learning_objectives": [
+        "Recognize the risk of accidental information disclosure in public settings.",
+        "Learn best practices for maintaining confidentiality outside the office."
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Unverified Social Media Connection",
+      "description": "You receive a friend or connection request on social media from someone claiming to be associated with your company, but you do not recognize them.",
+      "tasks": [
+        "Review the connection request carefully.",
+        "Decide whether to accept or verify the request.",
+        "Follow internal guidelines for managing social media connections."
+      ],
+      "solution": "Verify the sender’s identity using internal directories or by asking colleagues, and refrain from sharing company details until their identity is confirmed. This cautious approach protects both your personal and company information from potential social engineering attacks.",
+      "learning_objectives": [
+        "Understand social engineering risks via social media.",
+        "Learn the importance of verifying connections before engaging."
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Insecure File Sharing Link",
+      "description": "A coworker sends you a cloud-based file link that isn’t password-protected, potentially exposing sensitive information to unintended parties.",
+      "tasks": [
+        "Review the file-sharing method used.",
+        "Decide if the method meets the company’s security standards.",
+        "Follow the company’s guidelines for secure file sharing."
+      ],
+      "solution": "Confirm that the file is intended only for your access, and if necessary, request a secure (password-protected) link or alternative method from the sender. This measure helps ensure that sensitive documents are only accessible by authorized personnel.",
+      "learning_objectives": [
+        "Recognize the risks of unsecured file sharing.",
+        "Understand the need for controlled access when handling sensitive documents."
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Public Computer Usage",
+      "description": "You need to access your company email quickly from a public computer (e.g., in a library or café) and log in without properly logging out afterward.",
+      "tasks": [
+        "Review the security risks associated with using public computers.",
+        "Decide on steps to secure your session before leaving.",
+        "Follow the guidelines for safe public computer usage."
+      ],
+      "solution": "Always log out completely and clear any saved data after using a public computer, and use two-factor authentication when available. This prevents unauthorized access to your account after you leave the device.",
+      "learning_objectives": [
+        "Understand the risks of accessing sensitive information on public devices.",
+        "Learn the importance of proper sign-out procedures to prevent unauthorized access."
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Unauthorized App on Mobile Device",
+      "description": "You notice an unfamiliar app on your company-issued smartphone that you did not install.",
+      "tasks": [
+        "Review the list of apps on your device.",
+        "Decide if the app is authorized or not.",
+        "Follow the reporting procedure for unauthorized apps."
+      ],
+      "solution": "Do not open or use the app, and immediately report the unfamiliar application to IT for further investigation. This ensures that any potential threats are promptly identified and mitigated.",
+      "learning_objectives": [
+        "Recognize the potential dangers of unauthorized apps.",
+        "Understand the importance of regular device audits and security reviews."
+      ]
+    },
+    {
+      "id": 25,
+      "title": "Improper Document Disposal",
+      "description": "You are about to discard documents that contain confidential company data into the regular trash.",
+      "tasks": [
+        "Review the proper disposal methods for confidential documents.",
+        "Decide if the current disposal method is secure.",
+        "Follow the company-approved secure disposal procedure."
+      ],
+      "solution": "Dispose of the documents using the designated secure shredding or disposal service, ensuring no sensitive data is left exposed. This process reduces the risk of data leakage and maintains compliance with data protection policies.",
+      "learning_objectives": [
+        "Understand proper methods for disposing of sensitive documents.",
+        "Learn how to prevent data leakage through improper document disposal."
+      ]
+    },
+    {
+      "id": 26,
+      "title": "Personal USB Usage",
+      "description": "A coworker is transferring work files using a personal USB drive without following company policies.",
+      "tasks": [
+        "Review company policies regarding external storage devices.",
+        "Decide if the coworker’s actions align with these guidelines.",
+        "Follow the procedure for reporting non-compliant behavior."
+      ],
+      "solution": "Advise the coworker of the risks associated with using personal USB drives for work data and, if the behavior continues, report it to IT/security. This helps protect the network from potential malware and data breaches caused by unapproved devices.",
+      "learning_objectives": [
+        "Recognize the risks of using personal USB drives for work data.",
+        "Understand the importance of following secure data transfer protocols."
+      ]
+    },
+    {
+      "id": 27,
+      "title": "Malicious Pop-up Advertisement",
+      "description": "While working, a pop-up ad appears on your computer promoting a 'free' software upgrade that seems suspicious.",
+      "tasks": [
+        "Review the pop-up ad without interacting with it.",
+        "Decide whether to click on the ad or ignore it.",
+        "Follow the guidelines for reporting suspicious online content."
+      ],
+      "solution": "Close the pop-up immediately without clicking any links and report the occurrence to IT if similar ads reappear. This helps protect your system from potential phishing attempts or malware infections.",
+      "learning_objectives": [
+        "Identify potentially malicious online advertisements.",
+        "Learn safe browsing practices to avoid interacting with harmful content."
+      ]
+    },
+    {
+      "id": 28,
+      "title": "Misdirected Sensitive Email",
+      "description": "You receive an email that appears to contain sensitive information but is clearly not intended for you.",
+      "tasks": [
+        "Review the email carefully to determine if it was misdirected.",
+        "Decide whether to interact with the email content.",
+        "Follow the procedure for handling misdirected emails."
+      ],
+      "solution": "Do not forward or engage with the email; notify the sender or IT immediately about the misdirected sensitive information. This prevents the accidental spread of confidential data and ensures proper handling according to company protocols.",
+      "learning_objectives": [
+        "Understand the importance of handling misdirected information securely.",
+        "Learn proper reporting procedures for receiving sensitive data in error."
+      ]
+    },
+    {
+      "id": 29,
+      "title": "Anomalous Copier Activity",
+      "description": "The office copier suddenly starts copying or scanning documents on its own, which is not typical behavior.",
+      "tasks": [
+        "Monitor the copier for any unusual activity.",
+        "Decide if the behavior deviates from normal usage.",
+        "Follow the procedure for reporting device anomalies."
+      ],
+      "solution": "Avoid using the copier and immediately report the unusual activity, including details like time and error messages, to IT. This action helps in quickly identifying a potential security breach or technical malfunction.",
+      "learning_objectives": [
+        "Recognize that unusual behavior in shared devices may indicate security issues.",
+        "Understand the importance of reporting anomalies promptly."
+      ]
+    },
+    {
+      "id": 30,
+      "title": "Unsolicited IT Survey Request",
+      "description": "You receive an unexpected email asking you to fill out a survey that requires inputting sensitive login or personal information.",
+      "tasks": [
+        "Review the survey request for potential red flags.",
+        "Decide whether the information requested is appropriate.",
+        "Follow the procedure for verifying unsolicited requests."
+      ],
+      "solution": "Do not respond or provide any sensitive information until you verify the survey’s legitimacy with IT or HR. This step protects your personal and company data from potential phishing scams.",
+      "learning_objectives": [
+        "Learn to identify potential phishing attempts disguised as surveys.",
+        "Understand the importance of verifying requests before sharing sensitive data."
+      ]
+    },
+    {
+      "id": 31,
+      "title": "Questionable Multi-Factor Authentication (MFA) Prompt",
+      "description": "You encounter an MFA prompt that appears different from your usual login process, raising suspicion.",
+      "tasks": [
+        "Review the MFA prompt against your normal login process.",
+        "Decide whether to proceed with the authentication immediately.",
+        "Follow the procedure for reporting suspicious authentication prompts."
+      ],
+      "solution": "Do not complete the authentication process until you verify its legitimacy with IT; report the irregular prompt immediately. This caution ensures that any potential compromise in the authentication process is investigated before granting access.",
+      "learning_objectives": [
+        "Understand the standard MFA process and what deviations may indicate a security issue.",
+        "Learn to verify authentication prompts before proceeding."
+      ]
+    },
+    {
+      "id": 32,
+      "title": "Altered Email Signature",
+      "description": "You notice that a colleague’s email signature has changed unexpectedly, with unusual links or contact details.",
+      "tasks": [
+        "Review the email signature for discrepancies.",
+        "Decide if the changes appear legitimate.",
+        "Follow the procedure for verifying unexpected email changes."
+      ],
+      "solution": "Contact the colleague using another communication method to confirm the changes, and if confirmed as unauthorized, report the discrepancy to IT. This verification helps prevent potential phishing or account compromise.",
+      "learning_objectives": [
+        "Recognize signs of a potentially compromised email account.",
+        "Understand the importance of verifying unexpected changes in email communications."
+      ]
+    },
+    {
+      "id": 33,
+      "title": "Fake System Maintenance Notification",
+      "description": "An email announces a scheduled system maintenance with an urgent link to install a patch, but you were not expecting such communication.",
+      "tasks": [
+        "Review the maintenance notification for expected content.",
+        "Decide whether the notification appears legitimate.",
+        "Follow the procedure for verifying unexpected communications."
+      ],
+      "solution": "Verify the notification with IT before clicking any links and follow the official channels for system maintenance and updates. This ensures that you do not install unauthorized software or inadvertently expose your system to risk.",
+      "learning_objectives": [
+        "Learn to differentiate between legitimate notifications and phishing attempts.",
+        "Understand the importance of verifying unexpected maintenance communications."
+      ]
+    },
+    {
+      "id": 34,
+      "title": "Overexposed Social Media Post",
+      "description": "You notice that a colleague has posted a company event photo that inadvertently shows sensitive internal information (e.g., a computer screen with confidential data).",
+      "tasks": [
+        "Review the social media post for any accidental disclosure of sensitive information.",
+        "Decide whether the post should be edited or removed.",
+        "Follow the procedure for reporting accidental exposures."
+      ],
+      "solution": "Ask the colleague to immediately edit or remove the post to eliminate any sensitive information, and report the incident if the exposure persists. This helps protect company confidentiality and reinforces social media best practices.",
+      "learning_objectives": [
+        "Understand the risks of sharing internal information on social media.",
+        "Learn how to quickly mitigate accidental data exposure."
+      ]
+    },
+    {
+      "id": 35,
+      "title": "Unexpected Credential Reset Request",
+      "description": "You receive an email or text message asking you to reset your company account password without any prior notice.",
+      "tasks": [
+        "Review the credential reset request carefully.",
+        "Decide whether the request appears authentic.",
+        "Follow the procedure for verifying unexpected password reset requests."
+      ],
+      "solution": "Do not click on any links; instead, contact IT directly using known contact information to verify if the reset request is legitimate. This extra step ensures your account remains secure and prevents unauthorized access.",
+      "learning_objectives": [
+        "Recognize that unsolicited password reset requests can be phishing attempts.",
+        "Learn how to confirm the legitimacy of such communications."
+      ]
+    },
+    {
+      "id": 36,
+      "title": "Overheard Confidential Conversation",
+      "description": "In a public setting, you overhear a conversation discussing sensitive company information.",
+      "tasks": [
+        "Listen to determine if sensitive details are being shared.",
+        "Decide whether the situation warrants intervention or reporting.",
+        "Follow best practices for handling overheard confidential information."
+      ],
+      "solution": "Avoid repeating or sharing the overheard details, and inform your supervisor if you believe the conversation poses a security risk. This approach helps maintain confidentiality and prevents accidental data leaks.",
+      "learning_objectives": [
+        "Recognize the importance of discussing confidential matters in private.",
+        "Learn best practices to minimize the risk of information leakage in public."
+      ]
+    },
+    {
+      "id": 37,
+      "title": "Unauthorized Email Forwarding",
+      "description": "You discover that an employee’s email account is automatically forwarding emails to an unknown external address.",
+      "tasks": [
+        "Review the email forwarding settings if possible.",
+        "Decide whether this behavior is authorized.",
+        "Follow the procedure for reporting unauthorized email activity."
+      ],
+      "solution": "Do not interact with the forwarded emails; report the anomaly to IT/security immediately so that it can be investigated. This measure protects against data exfiltration and ensures that email security settings are properly maintained.",
+      "learning_objectives": [
+        "Understand the risk of unauthorized email forwarding.",
+        "Learn the importance of maintaining secure email configurations."
+      ]
+    },
+    {
+      "id": 38,
+      "title": "Misuse of Internal Social Platforms",
+      "description": "A colleague accidentally shares internal discussions or data on a corporate social network that is accessible to the public or external partners.",
+      "tasks": [
+        "Review the shared content for exposure of sensitive information.",
+        "Decide if the post’s visibility needs to be restricted.",
+        "Follow internal guidelines for handling internal social platform content."
+      ],
+      "solution": "Advise the colleague to restrict the post’s visibility or remove it entirely, and notify IT if the data exposure persists. This action helps prevent unauthorized access to confidential discussions and reinforces internal communication policies.",
+      "learning_objectives": [
+        "Recognize the importance of following internal communication guidelines.",
+        "Understand the risks of exposing sensitive information on public platforms."
+      ]
+    },
+    {
+      "id": 39,
+      "title": "Unsecured Video Conference",
+      "description": "During a video conference, you notice that the meeting lacks a password or proper access control, allowing unknown participants to join.",
+      "tasks": [
+        "Review the security settings of the video conference.",
+        "Decide whether the meeting setup is secure.",
+        "Follow the procedure for reporting and correcting security gaps in online meetings."
+      ],
+      "solution": "Inform the meeting host immediately about the security gap and recommend using a password-protected meeting link for future sessions. This ensures that only authorized participants join the meeting and that company data remains secure.",
+      "learning_objectives": [
+        "Understand the importance of securing video conferences.",
+        "Learn best practices for setting up and joining secure online meetings."
+      ]
+    },
+    {
+      "id": 40,
+      "title": "Unattended Mobile Device in Public",
+      "description": "You find a company-issued mobile device left unattended in a public area such as a café or conference room.",
+      "tasks": [
+        "Review the situation to assess the security of the unattended device.",
+        "Decide whether to take immediate action to secure it.",
+        "Follow the procedure for reporting lost or unattended devices."
+      ],
+      "solution": "If safe, secure the device by contacting the owner or IT; if uncertain, notify security personnel immediately. This prompt action prevents unauthorized access and protects sensitive information stored on the device.",
+      "learning_objectives": [
+        "Recognize the risks associated with unattended mobile devices.",
+        "Learn the appropriate steps to secure and report lost items."
+      ]
+    },
+    {
+      "id": 41,
+      "title": "Accidental Inclusion in Group Email",
+      "description": "You are mistakenly included in a group email that contains confidential information not meant for your role.",
+      "tasks": [
+        "Review the email content to determine if it contains sensitive information.",
+        "Decide whether to forward or share the content.",
+        "Follow the procedure for handling misdirected emails."
+      ],
+      "solution": "Do not forward or share the email; inform the sender about the error and ask for instructions on how to handle the sensitive content. This ensures that confidential information is not disseminated further and that the issue is properly documented.",
+      "learning_objectives": [
+        "Understand the importance of handling confidential information appropriately.",
+        "Learn the correct steps to take when receiving misdirected sensitive emails."
+      ]
+    },
+    {
+      "id": 42,
+      "title": "Suspicious LinkedIn Message",
+      "description": "You receive a message on LinkedIn from someone claiming to be from your company’s recruitment team, requesting personal details to update your profile.",
+      "tasks": [
+        "Review the LinkedIn message for authenticity.",
+        "Decide whether to share personal details.",
+        "Follow the procedure for verifying messages on professional networks."
+      ],
+      "solution": "Verify the sender’s identity through official channels such as internal HR, and refrain from sharing any sensitive information until confirmed. This prevents potential social engineering attempts and protects your professional profile.",
+      "learning_objectives": [
+        "Recognize potential social engineering attempts on professional networks.",
+        "Understand the need for verification before providing personal or sensitive data."
+      ]
+    },
+    {
+      "id": 43,
+      "title": "Incomplete Onboarding Security Briefing",
+      "description": "During your onboarding process, you realize that critical security policies and best practices were not thoroughly covered.",
+      "tasks": [
+        "Review your onboarding materials for any missing security content.",
+        "Decide if additional training is needed.",
+        "Follow the procedure for requesting further security information."
+      ],
+      "solution": "Request additional security training or documentation from HR/IT and provide feedback to improve the onboarding process for future employees. This ensures you are well-equipped with the necessary knowledge to maintain security in your role.",
+      "learning_objectives": [
+        "Understand the importance of comprehensive security training during onboarding.",
+        "Learn to seek out additional resources when necessary."
+      ]
+    },
+    {
+      "id": 44,
+      "title": "Personal Device Outdated Software",
+      "description": "You use your personal device for work tasks, but its operating system or applications are outdated, leaving it vulnerable.",
+      "tasks": [
+        "Review your device for available software updates.",
+        "Decide whether to update immediately.",
+        "Follow the guidelines for maintaining device security."
+      ],
+      "solution": "Check for and install any available updates immediately, and consult IT for additional security measures applicable to personal devices used for work. Keeping your software updated reduces vulnerabilities and helps protect against security threats.",
+      "learning_objectives": [
+        "Recognize the risks of using outdated software on personal devices.",
+        "Learn the importance of regular updates to maintain device security."
+      ]
+    },
+    {
+      "id": 45,
+      "title": "Misconfigured Email Client",
+      "description": "Your email client is automatically sending replies with outdated signatures or unintended content that may reveal sensitive information.",
+      "tasks": [
+        "Review your email client settings.",
+        "Decide if the current configuration aligns with company guidelines.",
+        "Follow the procedure for correcting any misconfigurations."
+      ],
+      "solution": "Update your email client settings to ensure they match current policies, and contact IT for assistance if needed. This prevents accidental data leakage and ensures that your communications remain professional and secure.",
+      "learning_objectives": [
+        "Understand the importance of properly configuring email tools.",
+        "Learn how to avoid unintentional data exposure through misconfigured settings."
+      ]
+    },
+    {
+      "id": 46,
+      "title": "Unauthorized Browser Extension",
+      "description": "You discover a new browser extension installed on your work computer that you did not authorize, which may monitor your online activities.",
+      "tasks": [
+        "Review the list of installed browser extensions.",
+        "Decide whether the extension is authorized.",
+        "Follow the procedure for removing unauthorized software."
+      ],
+      "solution": "Disable the unauthorized extension immediately and report it to IT for further investigation. This ensures that any potential data monitoring or tracking is stopped, protecting your privacy and company data.",
+      "learning_objectives": [
+        "Recognize the risks posed by unauthorized browser extensions.",
+        "Understand the importance of periodically reviewing installed plugins."
+      ]
+    },
+    {
+      "id": 47,
+      "title": "Unexpected Account Lockout",
+      "description": "Your account becomes locked after several failed login attempts, possibly due to an external brute-force attack or misused credentials.",
+      "tasks": [
+        "Review the circumstances leading to the account lockout.",
+        "Decide whether to attempt additional logins.",
+        "Follow the procedure for resolving account lockouts."
+      ],
+      "solution": "Contact IT to determine the cause and follow the secure process for resetting your credentials, avoiding repeated login attempts without guidance. This minimizes the risk of unauthorized access while ensuring that your account is promptly restored.",
+      "learning_objectives": [
+        "Understand account lockout policies and secure login practices.",
+        "Learn the proper steps to resolve unexpected access issues."
+      ]
+    },
+    {
+      "id": 48,
+      "title": "Data Sharing Error in Collaboration Tools",
+      "description": "While using a document-sharing platform, you accidentally share sensitive information with a group that includes external partners.",
+      "tasks": [
+        "Review the shared document’s permissions and access list.",
+        "Decide whether the current sharing settings are appropriate.",
+        "Follow the procedure for correcting data sharing errors."
+      ],
+      "solution": "Immediately remove the sensitive content from the shared space and notify IT or your supervisor to review and adjust the sharing permissions. This action helps ensure that only authorized personnel have access to sensitive documents.",
+      "learning_objectives": [
+        "Recognize the risks of accidental data sharing on collaboration tools.",
+        "Learn the importance of double-checking recipient lists before sharing files."
+      ]
+    },
+    {
+      "id": 49,
+      "title": "Misuse of Company Resources",
+      "description": "You observe a coworker using company software licenses or email accounts for personal projects in a way that may violate company policy.",
+      "tasks": [
+        "Review the company’s guidelines for resource usage.",
+        "Decide if the observed behavior is a violation of policy.",
+        "Follow the procedure for reporting misuse of company resources."
+      ],
+      "solution": "Remind the coworker of the proper usage guidelines and, if the behavior continues, report it to your manager or IT security team.",
+      "learning_objectives": [
+        "Understand the importance of adhering to company resource usage policies.",
+        "Learn how personal misuse of resources can lead to security vulnerabilities."
+      ]
+    },
+    {
+      "id": 50,
+      "title": "Suspicious Survey Request",
+      "description": "You receive a survey or feedback request that appears to be from a trusted source but asks for sensitive details not typically required.",
+      "tasks": [
+        "Review the survey request for authenticity and relevance.",
+        "Decide whether to provide the requested information.",
+        "Follow the procedure for verifying unexpected information requests."
+      ],
+      "solution": "Do not provide any sensitive data until you verify the survey’s legitimacy by contacting IT or HR, and then follow the appropriate instructions.",
+      "learning_objectives": [
+        "Recognize that phishing attempts can masquerade as surveys or feedback requests.",
+        "Learn to verify the legitimacy of unexpected information requests before sharing details."
+      ]
+    }
+  ]
+}
