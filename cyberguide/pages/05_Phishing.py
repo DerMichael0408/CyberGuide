@@ -192,7 +192,8 @@ YOU MUST:
 SCORING_INSTRUCTIONS = """
 ## SCIENTIFIC PHISHING AWARENESS ASSESSMENT
 
-Conduct a rigorous and scientific evaluation of the user's phishing awareness based on their 5 responses.
+Conduct a rigorous, scientific, and critical evaluation of the user's phishing awareness based on their 5 responses. Award points conservatively. Incomplete, generic, or vague answers should result in significant deductions. Joke or completely irrelevant answers should cause big point deductions.
+
 
 ### Scientific Assessment Framework:
 When calculating the final score, consider these key areas (but do NOT include separate scores for each in your output):
