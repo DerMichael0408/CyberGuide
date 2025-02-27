@@ -582,8 +582,7 @@ def create_theme_toggle():
                 # Toggle the theme
                 if current_theme == 'Light':
                     st.session_state.theme_mode = 'Dark'
-                    # Apply dark mode
-                    set_dark_mode()
+                    # DO NOT apply dark mode here - it should only be applied in setup_page
                 else:
                     st.session_state.theme_mode = 'Light'
                 

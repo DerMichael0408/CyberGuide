@@ -6,6 +6,15 @@ import os
 import string
 import random
 import math
+from utilities.template import setup_page
+from utilities.styling import apply_custom_styling, set_dark_mode
+
+# Initialize the page with proper setup and sidebar
+setup_page(
+    page_title="Password Creation",
+    icon_emoji="🔒",
+    subtitle="Learn how to create strong, secure passwords"
+)
 
 # Get the current page name from the file name
 def get_current_page():
@@ -28,14 +37,6 @@ question_number_key = get_page_key("question_number")
 started_key = get_page_key("started")
 first_password_key = get_page_key("first_password")
 final_password_key = get_page_key("final_password")
-
-# Set page config for wider layout and custom title/icon
-st.set_page_config(
-    page_title="Password Security Training",
-    page_icon="🔒",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
 
 # Custom CSS for better styling
 st.markdown("""
@@ -504,7 +505,7 @@ def force_next_question(response, current_question_num):
             parts = cleaned_text.split(pattern, 1)
             cleaned_text = parts[0]
     
-    # Remove any lettered or numbered points (a), b), 1., 2., etc.)
+    # Remove any lettered or numbered points (a), b), etc.)
     cleaned_text = re.sub(r'[a-z]\)\s+', '', cleaned_text)
     cleaned_text = re.sub(r'[A-Z]\)\s+', '', cleaned_text)
     cleaned_text = re.sub(r'\d+\.\s+', '', cleaned_text)

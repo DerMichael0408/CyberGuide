@@ -7,13 +7,6 @@ from utilities.styling import apply_custom_styling, set_dark_mode
 from utilities.template import setup_page
 from utilities.rag import retrieve_context
 
-st.set_page_config(
-    page_title="CyberGuide",
-    page_icon="💬",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
 # Function to get the current page name
 def get_current_page():
     # Get the filename of the current script
