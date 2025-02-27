@@ -140,20 +140,6 @@ st.markdown("""
         font-weight: bold;
         margin-bottom: 4px;
     }
-    /* Fix for input field positioning */
-    .chat-input-container {
-        position: sticky;
-        bottom: 0;
-        background-color: white;
-        padding-top: 20px;
-        margin-top: 10px;
-        z-index: 100;
-        border-top: 1px solid #eee;
-    }
-    /* Hide default Streamlit components that may interfere with layout */
-    .block-container {
-        padding-bottom: 2rem;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -194,17 +180,13 @@ scenario_text = """
 # The 5 questions for the training
 QUESTIONS = [
     "Based on the scenario described, what are three red flags that suggest this might be a social engineering attempt?",
-    
     "What is the most appropriate first response to this situation?\nA) Give the visitor your credentials since the CTO approved it\nB) Ask to see identification and verify with IT department\nC) Step away and let the visitor use your computer\nD) Tell the visitor to come back later when you're less busy",
-    
     "Which principle of social engineering is the visitor using when they say 'Several people on this floor have already done it'?",
-    
     "What should you do if you've already shared sensitive information with a suspected social engineer?",
-    
     "What security protocols should your organization implement to prevent this type of social engineering attack?"
 ]
 
-# System prompt with structured instructions and explicit question tracking
+# System prompt with structured instructions
 SYSTEM_PROMPT = """
 ## SOCIAL ENGINEERING AWARENESS TRAINING PROTOCOL
 You are a Cybersecurity Training Assistant delivering an interactive 5-question social engineering awareness training.
@@ -230,19 +212,12 @@ The training consists of exactly these 5 questions in this order:
 YOU MUST:
 1. Start with "This is a social engineering awareness exercise" and ask Question 1
 2. For each user response:
-   a. FIRST provide informative feedback on their answer to the CURRENT question only (1-2 sentences)
+   a. FIRST provide informative feedback on their answer (1-2 sentences)
    b. THEN immediately ask the next question in sequence
 3. Format multiple choice options in a clean, visually appealing way
 4. ALWAYS include the correct question number (e.g., "Question 2/5:", "Question 3/5:", etc.)
 5. NEVER repeat a question
 6. NEVER use lettered points (a), b), etc.) in your feedback - use plain text only
-7. NEVER skip ahead - always provide feedback for the current question number
-
-## QUESTION TRACKING
-YOU MUST TRACK WHICH QUESTION NUMBER THE USER IS CURRENTLY ANSWERING:
-- If the last question in the conversation was "Question 1/5", then provide feedback on Question 1 and ask Question 2/5
-- If the last question in the conversation was "Question 2/5", then provide feedback on Question 2 and ask Question 3/5
-- And so on
 
 ## FEEDBACK GUIDELINES
 For each question, evaluate the user's response and provide appropriate feedback:
@@ -287,11 +262,9 @@ When calculating the final score, consider these key areas (but do NOT include s
 ### Output Format Requirements:
 You MUST use EXACTLY this format:
 
-```
 Thank you for completing the social engineering awareness training. Your final score is: [X]/100.
 
 Security Assessment: [3-4 sentences providing evidence-based evaluation of their social engineering awareness, including strengths, areas for improvement, and specific recommendations]
-```
 
 The score should be a precise reflection of their demonstrated knowledge, not an arbitrary number. Use the assessment framework internally to calculate it, but only output the final score.
 """
@@ -299,22 +272,19 @@ The score should be a precise reflection of their demonstrated knowledge, not an
 # First question
 FIRST_QUESTION = "This is a social engineering awareness exercise. I will ask you 5 questions about recognizing and responding to social engineering attempts.\n\nQuestion 1/5: Based on the scenario described, what are three red flags that suggest this might be a social engineering attempt?"
 
-# Function to format multiple choice options with improved regex pattern
+# Function to format multiple choice options
 def format_multiple_choice(question_text):
     """Format multiple choice options with better styling"""
     if "A)" in question_text and "B)" in question_text:
         # Split the question into the prompt and options
-        parts = question_text.split("A)", 1)
-        main_text = parts[0]
-        options_text = "A)" + parts[1] if len(parts) > 1 else ""
+        main_text, options_text = question_text.split("A)", 1)
+        options_text = "A)" + options_text
         
-        # Use a more robust regex pattern to correctly capture all options
-        option_pattern = r'([A-D]\))(.*?)(?=[A-D]\)|$)'
-        options = re.findall(option_pattern, options_text, re.DOTALL)
-        
+        # Split options and format them
+        options = re.findall(r'([A-D]\))([^A-D\)]+)', options_text)
         formatted_options = ""
         for opt_letter, opt_text in options:
-            formatted_options += f'<div class="multiple-choice-option">{opt_letter}{opt_text.strip()}</div>'
+            formatted_options += f'<div class="multiple-choice-option">{opt_letter}{opt_text}</div>'
         
         # Combine with styled question text
         return f'<div class="question-text">{main_text}</div><div class="multiple-choice">{formatted_options}</div>'
@@ -322,92 +292,52 @@ def format_multiple_choice(question_text):
         # For non-multiple choice, just add basic styling
         return f'<div class="question-text">{question_text}</div>'
 
-# Helper function to get next question response with explicit question tracking
-def get_next_question_response(messages, current_question_num):
-    """
-    Gets response from LLM with explicit instruction about current question
-    """
-    # Create a copy of messages to modify for this specific request
-    request_messages = messages.copy()
-    
-    # Add explicit instruction about which question we're on
-    instruction = {
-        "role": "system", 
-        "content": f"IMPORTANT: The user is currently answering Question {current_question_num}/5. " +
-                  f"Provide feedback ONLY for Question {current_question_num}/5 and then ask Question {current_question_num + 1}/5."
-    }
-    
-    # Add the instruction to the request
-    request_messages.append(instruction)
-    
-    # Get response from LLM
-    response = ollama.chat(model="llava:latest", messages=request_messages)
-    return response["message"]["content"]
-
 # Function to ensure correct question sequencing
 def force_next_question(response, current_question_num):
     """
     Extracts feedback from AI response and adds the next correct question.
     Removes any lettered points (a), b), etc.) and ensures clean formatting.
     """
-    # Get the next question number (0-indexed internally, 1-indexed for display)
     next_question_idx = current_question_num
     
     # If we're done with questions, just return the response
     if next_question_idx >= 5:
         return response
     
-    # Process AI feedback
-    # First, let's check if the AI has already included the correct next question
-    next_question_marker = f"Question {next_question_idx + 1}/5:"
+    # Remove any existing questions from the AI response to isolate feedback
+    question_patterns = [
+        "Question 1/5:", "Question 2/5:", "Question 3/5:", "Question 4/5:", "Question 5/5:",
+        "Based on the scenario", "What is the most appropriate", "Which principle of social", 
+        "What should you do if", "What security protocols"
+    ]
     
-    if next_question_marker in response:
-        # The AI included the correct next question, so just clean up the response if needed
-        cleaned_text = response
-    else:
-        # The AI did not include the correct next question or included the wrong one
-        # Remove any existing questions
-        question_patterns = [
-            "Question 1/5:", "Question 2/5:", "Question 3/5:", "Question 4/5:", "Question 5/5:",
-            "Based on the scenario", "What is the most appropriate", "Which principle of social", 
-            "What should you do if", "What security protocols"
-        ]
-        
-        # Get the feedback portion by removing question text
-        cleaned_text = response
-        for pattern in question_patterns:
-            if pattern in cleaned_text:
-                parts = cleaned_text.split(pattern, 1)
-                cleaned_text = parts[0]
-        
-        # Remove any lettered or numbered points
-        cleaned_text = re.sub(r'[a-z]\)\s+', '', cleaned_text)
-        cleaned_text = re.sub(r'[A-Z]\)\s+', '', cleaned_text)
-        cleaned_text = re.sub(r'\d+\.\s+', '', cleaned_text)
-        cleaned_text = re.sub(r'•\s+', '', cleaned_text)
-        
-        # Remove "Progress: X/5 questions" text if it appears
-        cleaned_text = re.sub(r'Progress: \d/5 questions', '', cleaned_text)
+    cleaned_text = response
+    for pattern in question_patterns:
+        if pattern in cleaned_text:
+            parts = cleaned_text.split(pattern, 1)
+            cleaned_text = parts[0]
     
-    # Ensure we get at least one complete sentence of feedback
+    # Remove any lettered or numbered points
+    cleaned_text = re.sub(r'[a-z]\)\s+', '', cleaned_text)
+    cleaned_text = re.sub(r'[A-Z]\)\s+', '', cleaned_text)
+    cleaned_text = re.sub(r'\d+\.\s+', '', cleaned_text)
+    cleaned_text = re.sub(r'•\s+', '', cleaned_text)
+    
+    # Remove any "Progress: X/5 questions" references
+    cleaned_text = re.sub(r'Progress: \d/5 questions', '', cleaned_text)
+    
+    # Ensure we get at least one sentence of feedback
     sentences = re.split(r'(?<=[.!?])\s+', cleaned_text.strip())
-    
-    # Make sure we have at least one sentence but not more than 3
     feedback = ' '.join(sentences[:min(3, len(sentences))]).strip()
     
-    # Build the correct next question text with proper numbering
+    # Build the next question text
     display_num = next_question_idx + 1
     next_question = f"Question {display_num}/5: {QUESTIONS[next_question_idx]}"
     
-    # If the AI already included the correct next question, return as is
-    if next_question_marker in response:
-        return response
-    
-    # Combine feedback with next question, ensuring there's a proper break between them
+    # Combine feedback with next question
     if feedback:
         return f"{feedback}\n\n{next_question}"
     else:
-        # Fallback feedback if none was extracted
         return f"I understand your response.\n\n{next_question}"
 
 # Function to format messages with custom styling
@@ -415,9 +345,8 @@ def format_message(message, role):
     if role == "user":
         return f'<div class="user-message">{message}</div>'
     else:
-        # Format assistant messages with highlighted question number
+        # Highlight question text if it includes "Question X/5:"
         if "Question" in message and "/5:" in message:
-            # Split by question marker to highlight it
             parts = re.split(r'(Question \d/5:)', message, 1)
             if len(parts) > 1:
                 feedback = parts[0].strip()
@@ -431,7 +360,7 @@ def format_message(message, role):
                 # Format question number
                 formatted_question = f'<span class="question-number">{question_part}</span>'
                 
-                # Format the question text (with special handling for multiple choice)
+                # Format multiple choice if present
                 if "A)" in question_text and "B)" in question_text:
                     formatted_content = format_multiple_choice(question_text)
                     formatted += f'<div>{formatted_question} {formatted_content}</div>'
@@ -440,209 +369,163 @@ def format_message(message, role):
                 
                 return f'<div class="assistant-message">{formatted}</div>'
         
-        # Default formatting for other assistant messages
+        # Default formatting
         return f'<div class="assistant-message">{message}</div>'
 
 # Initialize page-specific session state
 if messages_key not in st.session_state:
     st.session_state[messages_key] = []
-    
 if question_number_key not in st.session_state:
     st.session_state[question_number_key] = 0
-    
 if started_key not in st.session_state:
     st.session_state[started_key] = False
 
-# Display the training title with better styling
+# Display the training title
 st.markdown('<div class="big-title">🕵️ Social Engineering Awareness Training</div>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Complete this interactive training to recognize and respond to social engineering attempts</div>', unsafe_allow_html=True)
 
-# Add columns for layout
+# Layout columns
 col1, col2 = st.columns([2, 1])
 
-# Display scenario 
+# Display scenario in col1
 with col1:
     st.markdown(f'<div class="scenario-container">{scenario_text}</div>', unsafe_allow_html=True)
 
-# Display training info in sidebar
+# Sidebar info and progress in col2
 with col2:
     st.info("**About this training**\n\n"
             "This interactive social engineering awareness course will test your knowledge with 5 key questions.\n\n"
             "Learn how to recognize and respond to social engineering attempts in the workplace.")
     
-    # Show progress with custom styling in the sidebar only
     if st.session_state[question_number_key] > 0:
-        # Calculate progress percentage
         progress_percent = min((st.session_state[question_number_key]) * 20, 100)
         question_display = min(st.session_state[question_number_key], 5)
         
         st.write(f"**Progress: {question_display}/5 questions**")
         st.progress(progress_percent)
 
-# Create a dedicated container for messages (history)
-message_container = st.container()
+st.write("---")  # Divider
 
-# Use the full width for the chat interface
-with col1:
-    st.write("---")
-
-    # Initialize the training with fixed approach - using page-specific keys
-    if not st.session_state[started_key]:
-        # Set the initial system prompt
-        st.session_state[messages_key] = [{"role": "system", "content": SYSTEM_PROMPT}]
-        
-        # Add the scenario as context (but don't display this)
-        st.session_state[messages_key].append({"role": "user", "content": f"Let's start the social engineering training. The user can see the scenario in the UI already."})
-        
-        # Use our predefined first question to ensure consistency
-        first_message = FIRST_QUESTION
-        
-        # Add to message history
-        st.session_state[messages_key].append({"role": "assistant", "content": first_message})
-        st.session_state[started_key] = True
-        st.session_state[question_number_key] = 1
-
-    # Create a container for the chat input at the bottom
-    chat_input_container = st.container()
-
-    # Display message history with custom styling - using page-specific keys
-    with message_container:
-        for idx, message in enumerate(st.session_state[messages_key]):
-            # Skip system messages and the initial context message
-            if message["role"] == "system":
-                continue
-            if idx == 1 and message["role"] == "user" and "Let's start the social engineering training" in message["content"]:
-                continue
-            
-            # Display the message with enhanced formatting
-            st.markdown(format_message(message["content"], message["role"]), unsafe_allow_html=True)
-
-    # Create a spacer to ensure there's room before the input field
-    st.write("")
-    st.write("")
+# Initialize the conversation if not started
+if not st.session_state[started_key]:
+    st.session_state[messages_key] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    st.session_state[messages_key].append({"role": "user", "content": "Let's start the social engineering training. The user can see the scenario in the UI."})
     
-    # Wrap the chat input in its own container and custom HTML to pin it to bottom
-    with chat_input_container:
-        st.markdown('<div class="chat-input-container">', unsafe_allow_html=True)
-        user_input = st.chat_input("Type your answer here...")
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Provide the first question
+    first_message = FIRST_QUESTION
+    st.session_state[messages_key].append({"role": "assistant", "content": first_message})
+    
+    st.session_state[started_key] = True
+    st.session_state[question_number_key] = 1
 
-    if user_input:
-        # Append user input to page-specific chat history
-        st.session_state[messages_key].append({"role": "user", "content": user_input})
-        
-        # If we've completed all 5 questions, generate final score
-        if st.session_state[question_number_key] == 5:  # This is the answer to Question 5
-            with st.spinner("Conducting scientific assessment of your social engineering awareness..."):
-                # Generate final score with scientific assessment
-                final_score_messages = st.session_state[messages_key] + [{"role": "system", "content": SCORING_INSTRUCTIONS}]
-                final_score_response = ollama.chat(model="llava:latest", messages=final_score_messages)
-                final_score = final_score_response["message"]["content"]
-                
-                # Extract score for visual display
-                score_match = re.search(r'(\d+)/100', final_score)
-                if score_match:
-                    score_num = int(score_match.group(1))
-                    
-                    # Extract assessment text
-                    assessment_text = ""
-                    if "Security Assessment:" in final_score:
-                        assessment_text = final_score.split("Security Assessment:")[1].strip()
-                    
-                    # Create enhanced visual score display
-                    score_html = f"""
-                    <div class="score-container">
-                        <h2>Training Complete! 🎉</h2>
-                        <h1 style="font-size: 48px; margin: 20px 0;">{score_num}/100</h1>
-                        <p>{assessment_text}</p>
-                    </div>
-                    """
-                    
-                    # Add to message history and rerun to update the display
-                    st.session_state[messages_key].append({"role": "assistant", "content": final_score})
-                    
-                    # Update all_chat with local chat history
-                    if "all_chats" not in st.session_state:
-                        st.session_state["all_chats"] = {}
-                    st.session_state["all_chats"][current_page] = st.session_state[messages_key]
-                    
-                    # Initialize scenario_scores if it doesn't exist
-                    if "scenario_scores" not in st.session_state:
-                        st.session_state.scenario_scores = {
-                            "phishing": {"score": 0, "completed": False},
-                            "password": {"score": 0, "completed": False},
-                            "social": {"score": 0, "completed": False}
-                        }
-                    
-                    # Only increment completed_number if social scenario wasn't already completed
-                    if not st.session_state.scenario_scores["social"]["completed"]:
-                        # Initialize completed_number if it doesn't exist
-                        if "completed_number" not in st.session_state:
-                            st.session_state.completed_number = 0
-                        
-                        # Increment the completed scenarios counter
-                        st.session_state.completed_number += 1
-                    
-                    # Update the score and mark as completed
-                    st.session_state.scenario_scores["social"] = {
-                        "score": score_num,
-                        "completed": True
-                    }
-                    
-                    # Rerun to display updated state
-                    st.rerun()
-                
-                else:
-                    # Fallback if score parsing fails
-                    st.session_state[messages_key].append({"role": "assistant", "content": final_score})
-                    st.rerun()
-        else:
-            # Generate AI response for the next question - using the enhanced function
-            with st.spinner("Analyzing your response..."):
-                # Get response from LLM with explicit question tracking
-                ai_message = get_next_question_response(
-                    st.session_state[messages_key], 
-                    st.session_state[question_number_key]
-                )
-                
-                # Force the correct next question and include feedback
-                fixed_message = force_next_question(ai_message, st.session_state[question_number_key])
-                
-                # Add to message history
-                st.session_state[messages_key].append({"role": "assistant", "content": fixed_message})
-                
-                # Increment question counter
-                st.session_state[question_number_key] += 1
-                
-                # Rerun to update the display with the new message
-                st.rerun()
+# Display message history (excluding system and the "context" user message)
+for idx, message in enumerate(st.session_state[messages_key]):
+    if message["role"] == "system":
+        continue
+    if idx == 1 and message["role"] == "user" and "Let's start the social engineering training." in message["content"]:
+        continue
+    st.markdown(format_message(message["content"], message["role"]), unsafe_allow_html=True)
 
-# Reset button (only show in completed state)
-if st.session_state.get(question_number_key, 0) == 5 and len(st.session_state[messages_key]) > 7:  # At least 7 messages means training is completed
+# ─────────────────────────────────────────────────────────────────────────
+# IMPORTANT: Place st.chat_input() AFTER displaying messages so it's pinned
+# ─────────────────────────────────────────────────────────────────────────
+user_input = st.chat_input("Type your answer here...")
+
+if user_input:
+    # Add user input to the conversation
+    st.session_state[messages_key].append({"role": "user", "content": user_input})
+    st.markdown(format_message(user_input, "user"), unsafe_allow_html=True)
+    
+    # If we've just answered question 5, generate final score
+    if st.session_state[question_number_key] == 5:
+        with st.spinner("Conducting scientific assessment of your social engineering awareness..."):
+            final_score_messages = st.session_state[messages_key] + [{"role": "system", "content": SCORING_INSTRUCTIONS}]
+            final_score_response = ollama.chat(model="llava:latest", messages=final_score_messages)
+            final_score = final_score_response["message"]["content"]
+            
+            # Attempt to parse the score
+            score_match = re.search(r'(\d+)/100', final_score)
+            if score_match:
+                score_num = int(score_match.group(1))
+                # Extract assessment text
+                assessment_text = ""
+                if "Security Assessment:" in final_score:
+                    assessment_text = final_score.split("Security Assessment:")[1].strip()
+                
+                score_html = f"""
+                <div class="score-container">
+                    <h2>Training Complete! 🎉</h2>
+                    <h1 style="font-size: 48px; margin: 20px 0;">{score_num}/100</h1>
+                    <p>{assessment_text}</p>
+                </div>
+                """
+                st.markdown(score_html, unsafe_allow_html=True)
+            else:
+                st.markdown(format_message(final_score, "assistant"), unsafe_allow_html=True)
+            
+            st.session_state[messages_key].append({"role": "assistant", "content": final_score})
+            
+            # Store results in session state if desired
+            if "all_chats" not in st.session_state:
+                st.session_state["all_chats"] = {}
+            st.session_state["all_chats"][current_page] = st.session_state[messages_key]
+            
+            # Track scenario scores
+            if "scenario_scores" not in st.session_state:
+                st.session_state.scenario_scores = {
+                    "phishing": {"score": 0, "completed": False},
+                    "password": {"score": 0, "completed": False},
+                    "social": {"score": 0, "completed": False}
+                }
+            
+            # Only increment if not previously completed
+            if score_match and not st.session_state.scenario_scores["social"]["completed"]:
+                if "completed_number" not in st.session_state:
+                    st.session_state.completed_number = 0
+                st.session_state.completed_number += 1
+            
+            # Update scenario score
+            if score_match:
+                st.session_state.scenario_scores["social"] = {
+                    "score": score_num,
+                    "completed": True
+                }
+            
+            # Show final progress
+            with col2:
+                st.write("**Progress: 5/5 questions**")
+                st.progress(100)
+            
+            st.success("🎓 Training completed successfully! Your results have been recorded.")
+            if st.button("📜 Download Certificate of Completion"):
+                st.info("Certificate generation would be implemented here in a production environment.")
+
+    else:
+        # Otherwise, get next question/feedback from LLM
+        with st.spinner("Analyzing your response..."):
+            response = ollama.chat(model="llava:latest", messages=st.session_state[messages_key])
+            ai_message = response["message"]["content"]
+            
+            # Force correct next question
+            fixed_message = force_next_question(ai_message, st.session_state[question_number_key])
+            
+            st.markdown(format_message(fixed_message, "assistant"), unsafe_allow_html=True)
+            st.session_state[messages_key].append({"role": "assistant", "content": fixed_message})
+            
+            # Increment question counter
+            st.session_state[question_number_key] += 1
+            
+            # Update progress
+            with col2:
+                question_display = min(st.session_state[question_number_key], 5)
+                progress_percent = min(st.session_state[question_number_key] * 20, 100)
+                st.write(f"**Progress: {question_display}/5 questions**")
+                st.progress(progress_percent)
+
+# Reset button (only show after all questions)
+if st.session_state.get(question_number_key, 0) == 5:
     with col1:
-        # Display the final score after rerun
-        for message in st.session_state[messages_key]:
-            if message["role"] == "assistant" and "Thank you for completing" in message["content"]:
-                score_match = re.search(r'(\d+)/100', message["content"])
-                if score_match:
-                    score_num = int(score_match.group(1))
-                    assessment_text = ""
-                    if "Security Assessment:" in message["content"]:
-                        assessment_text = message["content"].split("Security Assessment:")[1].strip()
-                    
-                    score_html = f"""
-                    <div class="score-container">
-                        <h2>Training Complete! 🎉</h2>
-                        <h1 style="font-size: 48px; margin: 20px 0;">{score_num}/100</h1>
-                        <p>{assessment_text}</p>
-                    </div>
-                    """
-                    st.markdown(score_html, unsafe_allow_html=True)
-        
-        # Show success message and certificate button
-        st.success("🎓 Training completed successfully! Your results have been recorded.")
         if st.button("🔄 Start New Training"):
-            # Reset all page-specific session state variables
             st.session_state[messages_key] = []
             st.session_state[question_number_key] = 0
             st.session_state[started_key] = False
