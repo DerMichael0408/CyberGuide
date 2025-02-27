@@ -6,15 +6,6 @@ with LLM-driven evaluation and feedback.
 """
 
 import streamlit as st
-
-# Set page config MUST be the first Streamlit command
-st.set_page_config(
-    page_title="Password Security Training",
-    page_icon="🔒",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
-
 import ollama
 import re
 import time
@@ -22,6 +13,7 @@ import os
 import sys
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+from utilities.template import setup_page
 
 # Paths definition
 BASE_DIR = Path(__file__).parent.parent  # Goes one level up from pages/
@@ -68,12 +60,12 @@ except ImportError as e:
         return "*" * len(password)
         
     def generate_password_options():
-        """Fallback password options"""
+        """Password options with clear security levels"""
         return [
             {"letter": "A", "password": "password123", "description": "Common word with predictable numbers", "security_level": "Very Weak"},
-            {"letter": "B", "password": "P@55word", "description": "Simple substitutions of letters with symbols", "security_level": "Weak"},
-            {"letter": "C", "password": "BlueHorse42!", "description": "Contains words but with mixed case and symbols", "security_level": "Moderate"},
-            {"letter": "D", "password": "j8K#p3vR!2sT&9qZ", "description": "Long, random mix of characters, numbers and symbols", "security_level": "Strong"}
+            {"letter": "B", "password": "Summer2025!", "description": "Predictable pattern with season and year", "security_level": "Weak"},
+            {"letter": "C", "password": "BlueHorse42!", "description": "Common words with numbers and symbols", "security_level": "Moderate"},
+            {"letter": "D", "password": "j8K#p3vR!2sT&9qZ", "description": "Random mix of characters, numbers and symbols", "security_level": "Strong"}
         ]
 
 # Set the evaluate_password_strength function
@@ -132,7 +124,14 @@ def load_css():
         </style>
         """, unsafe_allow_html=True)
 
-# Load CSS
+# Setup page
+setup_page(
+    page_title="Password Security Training",
+    icon_emoji="🔒",
+    subtitle="Learn how to create strong, secure passwords"
+)
+
+# Load CSS for additional styling specific to this module
 load_css()
 
 # Get the current page name from the file name
@@ -251,11 +250,14 @@ def construct_question_2():
     if password_options_key not in st.session_state:
         st.session_state[password_options_key] = generate_password_options()
     
+    # Include options in the question, but in a simple text-only format
+    # This ensures they show up in the chat message 
     options = st.session_state[password_options_key]
     
     # Construct the question
-    question = "Which of these passwords is the MOST secure?\n"
+    question = "Which of these passwords is the MOST secure?\n\n"
     
+    # Add options as plain text
     for option in options:
         question += f"{option['letter']}) {option['password']}\n"
     
@@ -283,60 +285,14 @@ def format_message(message, role):
                 # Format question number
                 formatted_question = f'<span class="question-number">{question_part}</span>'
                 
-                # For multiple choice passwords question, format it specially
-                if "Which of these passwords is the MOST secure?" in question_text:
-                    # Format the main question
-                    formatted += f'<div>{formatted_question} {question_text.split("A)")[0].strip()}</div>'
+                # For all multiple choice questions (including password question)
+                if "A)" in question_text and "B)" in question_text:
+                    # Show the full question text with options for all multiple choice questions
+                    formatted += f'<div>{formatted_question} {question_text}</div>'
                     
                     # Store the question number in session state
                     current_q_num = int(re.search(r'Question (\d+)/5:', message).group(1))
                     st.session_state["current_mc_question"] = current_q_num
-                    
-                    # Extract and format password options with security level styling
-                    options = st.session_state.get(password_options_key, [])
-                    if options:
-                        formatted += '<div style="margin-top: 10px;">'
-                        
-                        for option in options:
-                            # Determine CSS class based on security level
-                            security_class = ""
-                            if option["security_level"].lower() == "very weak":
-                                security_class = "password-option-very-weak"
-                            elif option["security_level"].lower() == "weak":
-                                security_class = "password-option-weak"
-                            elif option["security_level"].lower() == "moderate":
-                                security_class = "password-option-moderate"
-                            elif option["security_level"].lower() == "strong":
-                                security_class = "password-option-strong"
-                            
-                            # Format the option with security level and description
-                            formatted += f'''
-                            <div class="password-option {security_class}">
-                                <strong>{option['letter']}) {option['password']}</strong>
-                                <div style="margin-top: 5px; font-size: 14px;">
-                                    <span style="font-weight: bold;">{option['security_level']}:</span> {option['description']}
-                                </div>
-                            </div>
-                            '''
-                        
-                        formatted += '</div>'
-                # For other multiple choice questions, use standard formatting
-                elif "A)" in question_text and "B)" in question_text:
-                    # Format the main question
-                    main_text = question_text.split("A)")[0].strip()
-                    formatted += f'<div>{formatted_question} {main_text}</div>'
-                    
-                    # Store the question number for reference
-                    current_q_num = int(re.search(r'Question (\d+)/5:', message).group(1))
-                    st.session_state["current_mc_question"] = current_q_num
-                    
-                    # Extract and format regular multiple choice options
-                    options = extract_multiple_choice_options(question_text)
-                    if options:
-                        formatted += '<div style="margin-top: 10px;">'
-                        for letter, text in options:
-                            formatted += f'<div class="mc-option">{letter} {text}</div>'
-                        formatted += '</div>'
                 else:
                     formatted += f'<div>{formatted_question} {question_text}</div>'
                 
@@ -489,7 +445,19 @@ def handle_final_password(password_input):
     
     # Get comprehensive final assessment from LLM
     with st.spinner("Analyzing your password..."):
-        final_assessment = llm_final_password_assessment(password_input)
+        # Make sure to handle possible errors
+        try:
+            final_assessment = llm_final_password_assessment(password_input)
+        except Exception as e:
+            # Use fallback assessment if there's an error
+            final_assessment = {
+                "final_score": min(len(password_input) * 5, 100),
+                "assessment": f"Password assessment encountered an error: {str(e)[:50]}. Using basic scoring.",
+                "perfect_score_requirements": "Use a long, random mix of characters, numbers, and symbols.",
+                "strengths": ["Your effort to create a stronger password is appreciated."],
+                "weaknesses": ["Unable to perform detailed analysis."],
+                "improvement_suggestions": ["Consider using a password manager."]
+            }
     
     # Display the final score and assessment with improved formatting
     st.markdown("""
@@ -615,33 +583,80 @@ def display_interface():
     if is_mc:
         # Extract options
         if st.session_state[question_number_key] == 1:  # Password options question
-            options = [(option["letter"], option["password"]) for option in st.session_state[password_options_key]]
-        else:
-            options = extract_multiple_choice_options(current_question)
+            # For password options, use the full option data with styling
+            password_options = st.session_state[password_options_key]
             
-        if options:
-            # Use radio buttons for multiple choice
+            # Display each password option with custom styling
             st.write("### Select your answer:")
             
-            # Create radio buttons with the letter only for selection
-            option_texts = [f"{letter}) {text}" for letter, text in options]
+            # Create custom styled options for passwords
+            options = []
+            for option in password_options:
+                # Determine the style class based on security level
+                security_class = ""
+                security_level = option["security_level"].lower()
+                if security_level == "very weak":
+                    bg_color = "#ffebee"  # Light red
+                elif security_level == "weak":
+                    bg_color = "#fff8e1"  # Light yellow
+                elif security_level == "moderate":
+                    bg_color = "#e8f5e9"  # Light green
+                elif security_level == "strong":
+                    bg_color = "#e3f2fd"  # Light blue
+                
+                # Add the option to our list for the radio button
+                options.append((option["letter"], option["password"]))
+                
+                # Instead of complex HTML, use Streamlit's built-in components for better display
+                border_color = '#f44336' if security_level == 'very weak' else '#ffc107' if security_level == 'weak' else '#4caf50' if security_level == 'moderate' else '#2196f3'
+                
+                # Use a container with a border to display each option
+                with st.container(border=True):
+                    # Style the letter and password with markdown
+                    st.markdown(f"**{option['letter']}) {option['password']}**")
+                    # Show security level with colored text
+                    st.markdown(f"**{security_level.title()}**: {option['description']}")
+            
+            # Create radio buttons with just the letter options
+            option_texts = [f"{letter}" for letter, _ in options]
             selected_option = st.radio(
-                "Choose one option:",
+                "Choose one option (A, B, C, or D):",
                 option_texts,
-                label_visibility="collapsed",
-                key=f"radio_q{st.session_state[question_number_key]+1}"
+                label_visibility="visible",
+                key=f"radio_q{st.session_state[question_number_key]+1}",
+                horizontal=True
             )
+        else:
+            # For other multiple choice questions
+            options = extract_multiple_choice_options(current_question)
             
-            # Extract just the letter (A, B, C, D) from the selection
+            if options:
+                # Use radio buttons for multiple choice
+                st.write("### Select your answer:")
+                
+                # Create radio buttons with the letter only for selection
+                option_texts = [f"{letter}) {text}" for letter, text in options]
+                selected_option = st.radio(
+                    "Choose one option:",
+                    option_texts,
+                    label_visibility="collapsed",
+                    key=f"radio_q{st.session_state[question_number_key]+1}"
+                )
+            
+        # Get the selected letter - outside the if/else blocks to be accessible for all MC questions
+        if st.session_state[question_number_key] == 1:  # Password question
+            selected_letter = selected_option if selected_option else ""
+        else:
+            # Extract just the letter (A, B, C, D) from the selection for other MC questions
             selected_letter = selected_option.split(")")[0].strip() if selected_option else ""
-            
-            # Submit button
-            if st.button("Submit Answer", key=f"submit_q{st.session_state[question_number_key]+1}", type="primary"):
-                # Process the selected answer
-                answer_text = f"My answer is {selected_letter}."
-                st.session_state[messages_key].append({"role": "user", "content": answer_text})
-                process_answer(answer_text)
-                st.rerun()
+        
+        # Submit button for all multiple choice questions    
+        if st.button("Submit Answer", key=f"submit_q{st.session_state[question_number_key]+1}", type="primary"):
+            # Process the selected answer
+            answer_text = f"My answer is {selected_letter}."
+            st.session_state[messages_key].append({"role": "user", "content": answer_text})
+            process_answer(answer_text)
+            st.rerun()
     elif st.session_state[question_number_key] == 0:
         # Question 1: Password input
         password_input = st.text_input("Enter your password:", type="password", key="password_q1")

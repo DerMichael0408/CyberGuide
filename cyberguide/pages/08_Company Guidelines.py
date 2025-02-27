@@ -2,6 +2,7 @@ import streamlit as st
 import ollama
 from openai import OpenAI
 from utilities.icon import page_icon
+from utilities.template import setup_page
 
 def extract_model_names(models_info):
     """Safe model name extraction like other pages"""
@@ -10,12 +11,11 @@ def extract_model_names(models_info):
     return tuple(model.model for model in models_info.models)
 
 def main():
-    # 1. Page config FIRST
-    st.set_page_config(
+    # Use setup_page for consistent styling and sidebar
+    setup_page(
         page_title="Company Guidelines",
-        page_icon="📜",
-        layout="wide",
-        initial_sidebar_state="expanded",
+        icon_emoji="📜",
+        subtitle="Security policies and procedures for your organization"
     )
     
     # Initialize client

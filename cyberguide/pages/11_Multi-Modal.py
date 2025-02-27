@@ -9,12 +9,13 @@ import fitz  # PyMuPDF for PDF handling
 import tempfile
 import os
 from utilities.icon import page_icon
+from utilities.template import setup_page
 
-st.set_page_config(
+# Use setup_page for consistent styling and sidebar
+setup_page(
     page_title="Multi-Modal",
-    page_icon="📄",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    icon_emoji="📄",
+    subtitle="Analyze images and documents with multi-modal AI models"
 )
 
 # Custom CSS for better styling - matching model management page aesthetics

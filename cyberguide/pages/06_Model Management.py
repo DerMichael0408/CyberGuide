@@ -4,13 +4,13 @@ import time
 import os
 import re
 from utilities.icon import page_icon
+from utilities.template import setup_page
 
-# Page configuration
-st.set_page_config(
+# Use setup_page for consistent styling and sidebar
+setup_page(
     page_title="Model Management",
-    page_icon="⚙️",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    icon_emoji="⚙️",
+    subtitle="Download and manage AI models for CyberGuide"
 )
 
 # Custom CSS for better appearance

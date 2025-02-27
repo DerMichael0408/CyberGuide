@@ -1,5 +1,6 @@
 import streamlit as st
 from utilities.icon import page_icon
+from utilities.template import setup_page
 import ollama
 
 def extract_model_names(models_info):
@@ -9,16 +10,12 @@ def extract_model_names(models_info):
     return tuple(model.model for model in models_info.models)
 
 def main():
-    st.set_page_config(
+    # Use setup_page instead of st.set_page_config
+    setup_page(
         page_title="Welcome to CyberGuide",
-        page_icon="🛡️",
-        layout="wide",
-        initial_sidebar_state="expanded",
+        icon_emoji="🛡️",
+        subtitle="Your Interactive Cybersecurity Training Tool"
     )
-    
-    # Header and description
-    page_icon("🛡️")
-    st.header("Welcome to CyberGuide", divider="red", anchor=False)
     
     st.markdown("""
     ## Your Interactive Cybersecurity Training Tool
@@ -75,28 +72,25 @@ def main():
         
         task1_col, task2_col = st.columns(2)
         with task1_col:
-            if st.button("Task 1: Phishing Email", use_container_width=True):
-                st.switch_page("pages/02_Task 1.py")
-            st.caption("Identify suspicious emails")
+            if st.button("Task 1: Password Creation", use_container_width=True):
+                st.switch_page("pages/03_Password Creation.py")
+            st.caption("Create and manage secure passwords")
             
         with task2_col:
             if st.button("Task 2: Phishing Awareness", use_container_width=True):
-                st.switch_page("pages/03_Task 2.py")
+                st.switch_page("pages/05_Phishing.py")
             st.caption("Interactive phishing scenario")
     
     with col2:
         st.markdown("### Advanced Level")
         
-        task3_col, task4_col = st.columns(2)
+        task3_col, empty_col = st.columns(2)
         with task3_col:
-            if st.button("Task 3: USB Security", use_container_width=True):
-                st.switch_page("pages/04_Task 3.py")
-            st.caption("Physical security threats")
+            if st.button("Task 3: Social Engineering", use_container_width=True):
+                st.switch_page("pages/04_Social Engineering.py")
+            st.caption("Social engineering threats")
             
-        with task4_col:
-            if st.button("Task 4: Security Protocols", use_container_width=True):
-                st.switch_page("pages/05_Task 4.py")
-            st.caption("Company security guidelines")
+        # Task 4 removed as requested
     
     st.divider()
     

@@ -24,6 +24,25 @@ def setup_page(page_title, icon_emoji, subtitle=None, skip_header=False):
         }
     )
     
+    # Initialize chat sessions if they don't exist
+    if 'chat_sessions' not in st.session_state:
+        st.session_state.chat_sessions = [{'id': 0, 'title': 'New Chat 1', 'messages': []}]
+        
+    # Initialize current chat ID if not set
+    if 'current_chat_id' not in st.session_state:
+        st.session_state.current_chat_id = 0
+        
+    # Add global navigation flags to session state
+    # These let us safely navigate between pages and chats
+    if 'go_to_chat' not in st.session_state:
+        st.session_state.go_to_chat = False
+        
+    if 'chat_just_switched' not in st.session_state:
+        st.session_state.chat_just_switched = False
+        
+    if 'new_chat_created' not in st.session_state:
+        st.session_state.new_chat_created = False
+        
     # Initialize theme if not set
     if 'theme_mode' not in st.session_state:
         st.session_state.theme_mode = 'Light'

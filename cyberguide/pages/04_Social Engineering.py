@@ -3,6 +3,7 @@ import ollama
 import re
 import time
 import os
+from utilities.template import setup_page
 
 # Get the current page name from the file name
 def get_current_page():
@@ -24,12 +25,11 @@ messages_key = get_page_key("messages")
 question_number_key = get_page_key("question_number")
 started_key = get_page_key("started")
 
-# Set page config for wider layout and custom title/icon
-st.set_page_config(
+# Use setup_page for consistent styling and sidebar
+setup_page(
     page_title="Social Engineering Training",
-    page_icon="🕵️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+    icon_emoji="🕵️",
+    subtitle="Learn to recognize and respond to social engineering attempts"
 )
 
 # Custom CSS for better styling

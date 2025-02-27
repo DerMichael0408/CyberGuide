@@ -3,7 +3,7 @@ import ollama
 import re
 import time
 import os
-from utilities.template import setup_page
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
 
 # Get the current page name from the file name
 def get_current_page():
@@ -25,99 +25,12 @@ messages_key = get_page_key("messages")
 question_number_key = get_page_key("question_number")
 started_key = get_page_key("started")
 
-# Use setup_page for consistent styling and sidebar
+# Use the common setup_page function instead of manual configuration
 setup_page(
     page_title="Phishing Awareness Training",
     icon_emoji="🛡️",
-    subtitle="Learn to identify and respond to phishing attacks"
+    subtitle="Learn to identify and report suspicious emails"
 )
-
-# Custom CSS for better styling - unchanged
-st.markdown("""
-<style>
-    .main {
-        padding: 2rem 3rem;
-    }
-    .stProgress > div > div > div > div {
-        background-color: #4CAF50;
-    }
-    .stAlert {
-        border-radius: 10px;
-    }
-    .stExpander {
-        border-radius: 10px;
-        border: 1px solid #ddd;
-    }
-    .big-title {
-        font-size: 42px;
-        font-weight: 700;
-        margin-bottom: 10px;
-        color: #1E3A8A;
-        text-align: center;
-    }
-    .subtitle {
-        font-size: 18px;
-        margin-bottom: 30px;
-        text-align: center;
-        color: #666;
-    }
-    .email-container {
-        background-color: #f9f9f9;
-        border-radius: 10px;
-        border-left: 5px solid #ff4757;
-        padding: 20px;
-        margin-bottom: 25px;
-        font-family: monospace;
-    }
-    .user-message {
-        background-color: #e6f3ff;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 5px 0;
-    }
-    .assistant-message {
-        background-color: #f0f0f0;
-        border-radius: 10px;
-        padding: 15px;
-        margin: 5px 0;
-    }
-    .score-container {
-        background: linear-gradient(to right, #4CAF50, #2196F3);
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        margin: 20px 0;
-    }
-    .question-number {
-        font-weight: bold;
-        color: #1E3A8A;
-    }
-    .feedback {
-        padding: 10px;
-        background-color: #f0f7ff;
-        border-left: 3px solid #2196F3;
-        margin-bottom: 10px;
-    }
-    .multiple-choice {
-        padding: 2px 0;
-        margin: 2px 0;
-    }
-    .multiple-choice-option {
-        display: block;
-        padding: 8px 12px;
-        margin: 5px 0;
-        background-color: #f8f9fa;
-        border-radius: 6px;
-        border-left: 3px solid #6c757d;
-    }
-    .question-text {
-        font-size: 17px;
-        margin-bottom: 15px;
-        line-height: 1.5;
-    }
-</style>
-""", unsafe_allow_html=True)
 
 # Enhanced phishing email content - unchanged
 email_text = """
@@ -303,8 +216,57 @@ def force_next_question(response, current_question_num):
 
 # Function to format messages - unchanged
 def format_message(message, role):
+    # Add custom styling to the page to ensure messages are properly displayed
+    st.markdown("""
+    <style>
+    /* Chat message styling */
+    .user-message, .assistant-message {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        line-height: 1.5;
+    }
+    
+    .user-message {
+        background-color: #1976d2;
+        color: white;
+        margin-left: 20%;
+        margin-right: 2%;
+    }
+    
+    .assistant-message {
+        background-color: #f0f2f6;
+        color: #333;
+        margin-right: 20%;
+        margin-left: 2%;
+        border-left: 3px solid #1976d2;
+    }
+    
+    /* Dark mode overrides */
+    @media (prefers-color-scheme: dark) {
+        .assistant-message {
+            background-color: #2e3440;
+            color: #e5e9f0;
+            border-left: 3px solid #88c0d0;
+        }
+    }
+    
+    .question-number {
+        font-weight: bold;
+        color: #1976d2;
+    }
+    
+    .feedback {
+        font-style: italic;
+        margin-bottom: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     if role == "user":
-        return f'<div class="user-message">{message}</div>'
+        # Escape HTML in user messages
+        escaped_message = message.replace("<", "&lt;").replace(">", "&gt;")
+        return f'<div class="user-message">{escaped_message}</div>'
     else:
         # Format assistant messages by highlighting the question number
         if "Question" in message and "/5:" in message:
@@ -317,22 +279,32 @@ def format_message(message, role):
                 
                 formatted = ""
                 if feedback:
-                    formatted += f'<div class="feedback">{feedback}</div>'
+                    # Escape any HTML in feedback
+                    escaped_feedback = feedback.replace("<", "&lt;").replace(">", "&gt;")
+                    formatted += f'<div class="feedback">{escaped_feedback}</div>'
                 
                 # Format question number
                 formatted_question = f'<span class="question-number">{question_part}</span>'
                 
+                # Escape HTML in question text
+                escaped_question = question_text.replace("<", "&lt;").replace(">", "&gt;")
+                
                 # Format the question text (with special handling for multiple choice)
                 if "A)" in question_text and "B)" in question_text:
-                    formatted_content = format_multiple_choice(question_text)
+                    formatted_content = format_multiple_choice(escaped_question)
                     formatted += f'<div>{formatted_question} {formatted_content}</div>'
                 else:
-                    formatted += f'<div>{formatted_question} {question_text}</div>'
+                    formatted += f'<div>{formatted_question} {escaped_question}</div>'
                 
                 return f'<div class="assistant-message">{formatted}</div>'
         
         # Default formatting for other assistant messages
-        return f'<div class="assistant-message">{message}</div>'
+        # Escape any HTML tags in the message
+        escaped_message = message.replace("<", "&lt;").replace(">", "&gt;")
+        # Convert newlines to <br> for line breaks
+        formatted_message = escaped_message.replace("\n", "<br>")
+            
+        return f'<div class="assistant-message">{formatted_message}</div>'
 
 # Initialize page-specific session state
 if messages_key not in st.session_state:
@@ -355,7 +327,93 @@ col1, col2 = st.columns([2, 1])
 # Display phishing email for reference with custom styling
 with col1:
     with st.expander("📧 Sample Phishing Email", expanded=True):
-        st.markdown(f'<div class="email-container">{email_text}</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <style>
+        /* Email styling - works in both light and dark mode */
+        .email-container {
+            font-family: Arial, sans-serif;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            color: #333;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .email-header {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            color: #555;
+        }
+        
+        .email-subject {
+            font-weight: bold;
+            color: #000;
+            margin: 5px 0;
+        }
+        
+        .email-body {
+            line-height: 1.5;
+        }
+        
+        .phishing-link {
+            color: #0066cc;
+            text-decoration: underline;
+        }
+        
+        /* Dark mode override */
+        @media (prefers-color-scheme: dark) {
+            .email-container {
+                background-color: #e9e9e9;
+                border-color: #aaa;
+                color: #222;
+            }
+            
+            .email-header {
+                border-color: #bbb;
+                color: #444;
+            }
+            
+            .email-subject {
+                color: #111;
+            }
+        }
+        </style>
+        
+        <div class="email-container">
+            <div class="email-header">
+                <div><strong>From:</strong> security-alerts@globalbank-verification.com</div>
+                <div><strong>To:</strong> employee@company.com</div>
+                <div class="email-subject"><strong>Subject:</strong> URGENT: Your GlobalBank Account Has Been Compromised</div>
+            </div>
+            <div class="email-body">
+                <p>Dear Valued Customer,</p>
+                
+                <p>We have detected unusual activity on your GlobalBank account that requires immediate attention. Our security systems have flagged multiple suspicious login attempts from an unrecognized location.</p>
+                
+                <p>To prevent unauthorized transactions, your account access has been temporarily limited. You must verify your identity within 24 hours to avoid account suspension.</p>
+                
+                <p>✅ <a href="#" class="phishing-link">Verify Your Account Now: https://globelbank-security-portal.com/verify</a></p>
+                
+                <p>Please note:</p>
+                <ul>
+                    <li>This process takes only 2 minutes</li>
+                    <li>You will need your account number and password</li>
+                    <li>Failure to verify will result in account suspension</li>
+                </ul>
+                
+                <p>If you did not attempt to log in, please contact our security department immediately.</p>
+                
+                <p>Regards,<br>
+                GlobalBank Security Team</p>
+                
+                <p style="font-size: 0.8em; color: #777;">© 2025 GlobalBank. All rights reserved. This email is sent from an unmonitored account.</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 # Display training info in sidebar
 with col2:

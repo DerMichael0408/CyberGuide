@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import time
 from pathlib import Path
 
 def apply_custom_styling():
@@ -589,31 +590,100 @@ def create_theme_toggle():
                 # Force rerun to apply changes
                 st.rerun()
 
+def get_current_page():
+    """Get the current page name from the file name"""
+    try:
+        import os
+        # Get the currently executing script path
+        import inspect
+        import sys
+        
+        # Try to get the filename of the script that's currently running
+        frame = inspect.currentframe()
+        while frame:
+            if frame.f_code.co_filename != __file__:
+                current_file = frame.f_code.co_filename
+                # Extract just the file name without path
+                current_file = os.path.basename(current_file)
+                # Remove extension
+                current_page = os.path.splitext(current_file)[0]
+                return current_page
+            frame = frame.f_back
+        
+        # Fallback - try to use the main module
+        if hasattr(sys.modules['__main__'], '__file__'):
+            current_file = os.path.basename(sys.modules['__main__'].__file__)
+            current_page = os.path.splitext(current_file)[0]
+            return current_page
+    except:
+        pass
+    
+    # If we can't determine the page, return None
+    return None
+
 def create_chat_history():
     """
     Create a chat history section in the sidebar
     """
     with st.sidebar:
         with st.expander("Chat History", expanded=True):
-            # Initialize chat sessions if they don't exist
+            # Ensure chat sessions are initialized (this should be done in template.py)
+            # but we'll check again for safety
             if 'chat_sessions' not in st.session_state:
-                st.session_state.chat_sessions = [{'id': 0, 'title': 'New Chat', 'messages': []}]
+                st.session_state.chat_sessions = [{'id': 0, 'title': 'New Chat 1', 'messages': []}]
+            
+            if 'current_chat_id' not in st.session_state:
                 st.session_state.current_chat_id = 0
+                
+            # Safety check: if current_chat_id doesn't exist in sessions, reset to 0
+            current_chat_exists = False
+            for chat in st.session_state.chat_sessions:
+                if chat['id'] == st.session_state.current_chat_id:
+                    current_chat_exists = True
+                    break
+                    
+            if not current_chat_exists and len(st.session_state.chat_sessions) > 0:
+                st.session_state.current_chat_id = st.session_state.chat_sessions[0]['id']
             
             # New chat button
             if st.button("+ New Chat"):
                 # Generate a unique ID for the new chat
                 new_chat_id = max([chat['id'] for chat in st.session_state.chat_sessions], default=-1) + 1
-                # Add the new chat to the session state
+                # Add the new chat to the session state with numbered title
                 st.session_state.chat_sessions.append({
                     'id': new_chat_id,
-                    'title': f"New Chat",
+                    'title': f"New Chat {new_chat_id + 1}",
                     'messages': []
                 })
                 # Set the current chat to the new chat
                 st.session_state.current_chat_id = new_chat_id
-                # Use the new st.query_params API instead of the deprecated experimental version
+                
+                # Use the new st.query_params API 
                 st.query_params["chat"] = str(new_chat_id)
+                
+                # Use a safer approach to chat switching
+                # Set a flag to indicate new chat creation
+                st.session_state.new_chat_created = True
+                    
+                # Check if we need to navigate to the Expert page
+                current_page = get_current_page()
+                if current_page != "01_CyberGuide Expert":
+                    # Set a flag to redirect to Expert page
+                    st.session_state.go_to_chat = True
+                    # Wrap in a try-except to avoid crashes when navigating
+                    try:
+                        # Delay slightly to avoid race conditions
+                        time.sleep(0.1)
+                        st.switch_page("01_CyberGuide Expert.py")
+                    except Exception as e:
+                        try:
+                            time.sleep(0.1)
+                            st.switch_page("pages/01_CyberGuide Expert.py")
+                        except Exception as e2:
+                            pass
+                else:
+                    # We're already on the right page, just rerun but avoid double rerun issues
+                    st.rerun()
             
             # Display existing chats
             for chat in st.session_state.chat_sessions:
@@ -622,9 +692,35 @@ def create_chat_history():
                 if st.button(chat["title"], key=f"chat_{chat['id']}", 
                            use_container_width=True, 
                            help=f"Switch to {chat['title']}"):
+                    # Switch to the selected chat
                     st.session_state.current_chat_id = chat['id']
-                    # Use the new st.query_params API instead of the deprecated experimental version
+                    
+                    # Use the new st.query_params API 
                     st.query_params["chat"] = str(chat['id'])
+                    
+                    # Use a safer approach to chat switching
+                    # Set a flag to indicate chat switch, even on the Expert page
+                    st.session_state.chat_just_switched = True
+                    
+                    # Check if we need to navigate to the Expert page
+                    current_page = get_current_page()
+                    if current_page != "01_CyberGuide Expert":
+                        # Set a flag to redirect to Expert page
+                        st.session_state.go_to_chat = True
+                        # Wrap in a try-except to avoid crashes when navigating
+                        try:
+                            # Delay slightly to avoid race conditions
+                            time.sleep(0.1)
+                            st.switch_page("01_CyberGuide Expert.py")
+                        except Exception as e:
+                            try:
+                                time.sleep(0.1)
+                                st.switch_page("pages/01_CyberGuide Expert.py")
+                            except Exception as e2:
+                                pass
+                    else:
+                        # We're already on the right page, just rerun but avoid double rerun
+                        st.rerun()
 
 def initialize_sidebar():
     """

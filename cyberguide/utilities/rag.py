@@ -139,8 +139,6 @@ def retrieve_context(query, k=5):
 
 
 
-
 # Index the documents
 index_data("./Petra_logistics.pdf")
 index_data("./CybersecurityScenarios.json")
-

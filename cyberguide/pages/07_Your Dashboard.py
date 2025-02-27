@@ -7,16 +7,16 @@ from datetime import datetime
 import time
 import ollama
 import json
+from utilities.template import setup_page
 
-# Set page config for wider layout and custom title/icon
-st.set_page_config(
-    page_title="CyberGuide - Security Dashboard",
-    page_icon="🛡️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+# Use setup_page for consistent styling and sidebar
+setup_page(
+    page_title="Security Dashboard",
+    icon_emoji="📊",
+    subtitle="Your personalized cybersecurity performance overview"
 )
 
-# Custom CSS for better styling
+# Additional custom CSS for dashboard-specific styling
 st.markdown("""
 <style>
     .main {
