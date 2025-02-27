@@ -597,26 +597,34 @@ def create_chat_history():
         with st.expander("Chat History", expanded=True):
             # Initialize chat sessions if they don't exist
             if 'chat_sessions' not in st.session_state:
-                st.session_state.chat_sessions = []
-                st.session_state.current_chat_id = None
+                st.session_state.chat_sessions = [{'id': 0, 'title': 'New Chat', 'messages': []}]
+                st.session_state.current_chat_id = 0
             
             # New chat button
             if st.button("+ New Chat"):
-                new_chat_id = len(st.session_state.chat_sessions)
+                # Generate a unique ID for the new chat
+                new_chat_id = max([chat['id'] for chat in st.session_state.chat_sessions], default=-1) + 1
+                # Add the new chat to the session state
                 st.session_state.chat_sessions.append({
                     'id': new_chat_id,
-                    'title': f"Chat {new_chat_id + 1}",
+                    'title': f"New Chat",
                     'messages': []
                 })
+                # Set the current chat to the new chat
                 st.session_state.current_chat_id = new_chat_id
-                st.rerun()
+                # Use the new st.query_params API instead of the deprecated experimental version
+                st.query_params["chat"] = str(new_chat_id)
             
             # Display existing chats
             for chat in st.session_state.chat_sessions:
                 chat_class = "active-chat" if st.session_state.current_chat_id == chat['id'] else "chat-session"
-                if st.markdown(f'<div class="{chat_class}">{chat["title"]}</div>', unsafe_allow_html=True):
+                # For chat selection, use a button instead of markdown to be more reliable
+                if st.button(chat["title"], key=f"chat_{chat['id']}", 
+                           use_container_width=True, 
+                           help=f"Switch to {chat['title']}"):
                     st.session_state.current_chat_id = chat['id']
-                    st.rerun()
+                    # Use the new st.query_params API instead of the deprecated experimental version
+                    st.query_params["chat"] = str(chat['id'])
 
 def initialize_sidebar():
     """

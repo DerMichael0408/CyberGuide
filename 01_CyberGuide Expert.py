@@ -70,16 +70,28 @@ def main():
     if messages_key not in st.session_state:
         st.session_state[messages_key] = []
     
+    # Check for query parameters to handle chat navigation
+    if 'chat' in st.query_params:
+        try:
+            chat_id = int(st.query_params['chat'])
+            st.session_state.current_chat_id = chat_id
+        except ValueError:
+            pass
+            
     # If current_chat_id is set, use that chat's messages
     if st.session_state.get('current_chat_id') is not None:
         chat_id = st.session_state.current_chat_id
-        chat_messages = next((chat['messages'] for chat in st.session_state.chat_sessions if chat['id'] == chat_id), [])
+        chat = next((c for c in st.session_state.chat_sessions if c['id'] == chat_id), None)
         
         # Display messages from the current chat
-        for message in chat_messages:
-            avatar = "🤖" if message["role"] == "assistant" else "😎"
-            with message_container.chat_message(message["role"], avatar=avatar):
-                st.markdown(message["content"])
+        if chat and 'messages' in chat:
+            for message in chat['messages']:
+                avatar = "🤖" if message["role"] == "assistant" else "😎"
+                with message_container.chat_message(message["role"], avatar=avatar):
+                    st.markdown(message["content"])
+        else:
+            # No messages in this chat yet
+            pass
     else:
         # Display messages from the page-specific chat history
         for message in st.session_state[messages_key]:
@@ -90,19 +102,28 @@ def main():
 
     if prompt := st.chat_input("Enter a prompt here..."):
         try:
-            # Add user message to page-specific chat history
-            st.session_state[messages_key].append(
-                {"role": "user", "content": prompt})
-            
-            # If we're in a chat session, also add to that chat's history
+            # Don't duplicate messages - remove redundant append
             if st.session_state.get('current_chat_id') is not None:
                 chat_id = st.session_state.current_chat_id
-                for chat in st.session_state.chat_sessions:
-                    if chat['id'] == chat_id:
-                        chat['messages'].append({"role": "user", "content": prompt})
-                        break
-
-            st.session_state[messages_key].append({"role": "user", "content": prompt})
+                chat = next((c for c in st.session_state.chat_sessions if c['id'] == chat_id), None)
+                
+                if chat:
+                    # Add to chat session's messages
+                    chat['messages'].append({"role": "user", "content": prompt})
+                    
+                    # Update chat title if this is the first message
+                    if len(chat['messages']) == 1:
+                        # Use first few words for the chat title
+                        words = prompt.split()
+                        title = " ".join(words[:3])
+                        if len(words) > 3:
+                            title += "..."
+                        chat['title'] = title
+            else:
+                # Add to page-specific chat history if not using chat sessions
+                st.session_state[messages_key].append({"role": "user", "content": prompt})
+            
+            # Display the message
             message_container.chat_message("user", avatar="😎").markdown(prompt)
 
             # 🔍 Retrieve relevant cybersecurity knowledge from RAG
@@ -144,25 +165,17 @@ def main():
                 # Stream response and store it
                 response = st.write_stream(stream)
 
-            # Add assistant response to page-specific chat history
-            st.session_state[messages_key].append(
-                {"role": "assistant", "content": response})
-            
-            # If we're in a chat session, also add to that chat's history
+            # Add the assistant response
             if st.session_state.get('current_chat_id') is not None:
                 chat_id = st.session_state.current_chat_id
-                for chat in st.session_state.chat_sessions:
-                    if chat['id'] == chat_id:
-                        chat['messages'].append({"role": "assistant", "content": response})
-                        
-                        # Update chat title if this is the first message
-                        if len(chat['messages']) == 2:
-                            # Simple title generation - take first few words from user prompt
-                            words = prompt.split()
-                            title = " ".join(words[:3]) + "..."
-                            chat['title'] = title
-                        break
-            st.session_state[messages_key].append({"role": "assistant", "content": response})
+                chat = next((c for c in st.session_state.chat_sessions if c['id'] == chat_id), None)
+                
+                if chat:
+                    # Add to chat session's messages
+                    chat['messages'].append({"role": "assistant", "content": response})
+            else:
+                # Add to page-specific chat history if not using chat sessions
+                st.session_state[messages_key].append({"role": "assistant", "content": response})
 
         except Exception as e:
             st.error(e, icon="⛔️")            
