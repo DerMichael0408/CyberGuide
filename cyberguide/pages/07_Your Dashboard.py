@@ -7,6 +7,7 @@ from datetime import datetime
 import time
 import ollama
 import json
+from utilities.template import setup_page
 
 # Set page config for wider layout and custom title/icon
 st.set_page_config(

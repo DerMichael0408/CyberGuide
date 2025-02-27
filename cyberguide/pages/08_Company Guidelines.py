@@ -2,6 +2,7 @@ import streamlit as st
 import ollama
 from openai import OpenAI
 from utilities.icon import page_icon
+from utilities.template import setup_page
 
 def extract_model_names(models_info):
     """Safe model name extraction like other pages"""

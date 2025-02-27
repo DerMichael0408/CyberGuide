@@ -4,6 +4,8 @@ import time
 import os
 import re
 from utilities.icon import page_icon
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
+
 
 # Page configuration
 st.set_page_config(

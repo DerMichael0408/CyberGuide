@@ -9,6 +9,7 @@ import fitz  # PyMuPDF for PDF handling
 import tempfile
 import os
 from utilities.icon import page_icon
+from utilities.template import setup_page
 
 st.set_page_config(
     page_title="Task 1",

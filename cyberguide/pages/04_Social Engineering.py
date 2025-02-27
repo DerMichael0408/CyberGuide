@@ -4,6 +4,9 @@ import re
 import time
 import os
 
+from utilities.template import setup_page, mark_task_complete, show_task_completion_status
+
+
 # Get the current page name from the file name
 def get_current_page():
     # Get the filename of the current script

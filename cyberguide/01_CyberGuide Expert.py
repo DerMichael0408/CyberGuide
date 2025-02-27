@@ -3,6 +3,8 @@ import streamlit as st
 import os
 from openai import OpenAI
 from utilities.icon import page_icon
+from utilities.styling import apply_custom_styling, set_dark_mode
+from utilities.template import setup_page
 from utilities.rag import retrieve_context
 
 st.set_page_config(
