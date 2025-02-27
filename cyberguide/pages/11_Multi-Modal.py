@@ -11,8 +11,8 @@ import os
 from utilities.icon import page_icon
 
 st.set_page_config(
-    page_title="Task 1",
-    page_icon="1️⃣",
+    page_title="Multi-Modal",
+    page_icon="📄",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -98,8 +98,10 @@ def check_if_llava_installed():
     """
     try:
         models_info = ollama.list()
-        # Fix the error: use 'name' key instead of 'model'
-        installed_models = [m["name"] for m in models_info.get("models", [])]
+        # Try to get "name" and fallback to "model" if "name" isn't present.
+        installed_models = [
+            m.get("name", m.get("model", "")) for m in models_info.get("models", [])
+        ]
         return "llava:latest" in installed_models
     except Exception as e:
         st.error(f"Error checking models: {str(e)}")
@@ -181,17 +183,15 @@ def download_llava():
         return False
 
 def main():
-    page_icon("1️⃣")
+    page_icon("📄")
     role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
-    st.subheader(f"Task 1: Phishing{role_suffix}", divider="red", anchor=False)
+    st.subheader(f"Multi-Modal{role_suffix}", divider="red", anchor=False)
     
     # Initialize session state
     if "chats" not in st.session_state:
         st.session_state.chats = []
-
     if "current_document" not in st.session_state:
         st.session_state.current_document = None
-        
     if "document_type" not in st.session_state:
         st.session_state.document_type = None
     
@@ -226,7 +226,7 @@ def main():
         help="Upload an image or PDF to analyze for potential phishing indicators"
     )
 
-    # Create two columns for chat and image display
+    # Create two columns for chat and document display
     col1, col2 = st.columns(2)
 
     # Chat column
@@ -252,22 +252,23 @@ def main():
                         # Convert PDF pages to images
                         pdf_images = get_pdf_images(uploaded_file)
                         
-                        # Store the first image for analysis
+                        # Store the first image and text for analysis if available
                         if pdf_images:
                             st.session_state.current_document = uploaded_file.name
-                            image = pdf_images[0]
+                            st.session_state.pdf_image = pdf_images[0]
+                            st.session_state.pdf_text = pdf_text
                         else:
                             st.error("Could not extract images from PDF")
                             return
+                # Retrieve the cached image from session state
+                image = st.session_state.pdf_image
             else:
                 st.session_state.document_type = "image"
-                
                 # Process image
                 if st.session_state.current_document != uploaded_file.name:
                     # If new image, clear chat
                     st.session_state.chats = []
                     st.session_state.current_document = uploaded_file.name
-                
                 # Open the image
                 image = Image.open(uploaded_file)
             
@@ -301,12 +302,11 @@ def main():
                     
                     # Add context for PDF if applicable
                     if st.session_state.document_type == "pdf":
-                        # Create a prompt that includes both the image and text context
                         prompt = f"""
                         I'm showing you both an image of the first page of a PDF and providing some text extracted from it.
                         
                         Text from PDF:
-                        {pdf_text[:2000]}...
+                        {st.session_state.pdf_text[:2000]}...
                         
                         User question: {user_input}
                         
@@ -377,11 +377,11 @@ def main():
                     # Show page previews
                     for i, img in enumerate(pdf_previews):
                         st.markdown(f"##### Page {i+1}")
-                        st.image(img, use_column_width=True)
+                        st.image(img, use_container_width=True)
                         st.markdown("---")
                 else:
                     # Display image
-                    st.image(uploaded_file, caption="Uploaded image", use_column_width=True)
+                    st.image(uploaded_file, caption="Uploaded image", use_container_width=True)
                     
                     # Add some helpful tips for analysis
                     with st.expander("📝 Tips for Phishing Detection"):
@@ -409,7 +409,6 @@ def main():
                     unsafe_allow_html=True
                 )
                 
-                # Provide sample instructions
                 st.info("""
                 **This tool helps you analyze:**
                 
