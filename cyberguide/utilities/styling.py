@@ -398,13 +398,13 @@ def create_sidebar_resources():
                     st.warning("Try navigating to Dashboard page manually")
                 
             # Guidelines navigation
-            if st.button("Company Guidelines", key="sidebar_guidelines_btn", use_container_width=True,
-                        help="Read company security policies"):
-                try:
-                    st.switch_page("pages/08_Company Guidelines.py")
-                except Exception as e:
-                    st.error(f"Navigation error: {e}")
-                    st.warning("Try navigating to Guidelines page manually")
+            #if st.button("Company Guidelines", key="sidebar_guidelines_btn", use_container_width=True,
+            #            help="Read company security policies"):
+            #    try:
+            #        st.switch_page("pages/08_Company Guidelines.py")
+            #    except Exception as e:
+            #        st.error(f"Navigation error: {e}")
+            #        st.warning("Try navigating to Guidelines page manually")
                 
             # Model Management navigation
             if st.button("Model Management", key="sidebar_model_btn", use_container_width=True,
@@ -416,10 +416,10 @@ def create_sidebar_resources():
                     st.warning("Try navigating to Model Management page manually")
                 
             # Multi-Modal navigation
-            if st.button("Multi-Modal", key="sidebar_multimodal_btn", use_container_width=True,
+            if st.button("Guidelines", key="sidebar_multimodal_btn", use_container_width=True,
                         help="Image and text analysis"):
                 try:
-                    st.switch_page("pages/11_Multi-Modal.py")
+                    st.switch_page("pages/11_Guidelines.py")
                 except Exception as e:
                     st.error(f"Navigation error: {e}")
                     st.warning("Try navigating to Multi-Modal page manually")

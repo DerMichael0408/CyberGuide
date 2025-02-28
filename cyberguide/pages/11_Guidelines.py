@@ -13,9 +13,9 @@ from utilities.template import setup_page
 
 # Use setup_page for consistent styling and sidebar
 setup_page(
-    page_title="Multi-Modal",
+    page_title="Guidelines",
     icon_emoji="📄",
-    subtitle="Analyze images and documents with multi-modal AI models"
+    subtitle="Analyze and discuss content guidelines and documents"
 )
 
 # Custom CSS for better styling - matching model management page aesthetics
