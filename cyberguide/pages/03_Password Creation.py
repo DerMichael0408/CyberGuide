@@ -824,8 +824,8 @@ def main():
             st.session_state[password_options_key] = generate_password_options()
     
     # Display the training title
-    st.markdown('<div class="big-title">🔒 Password Security Training</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Learn how to create strong, secure passwords in this interactive training</div>', unsafe_allow_html=True)
+    # st.markdown('<div class="big-title">🔒 Password Security Training</div>', unsafe_allow_html=True)
+    # st.markdown('<div class="subtitle">Learn how to create strong, secure passwords in this interactive training</div>', unsafe_allow_html=True)
     
     # Display security fact
     st.markdown(f"""
