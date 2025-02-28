@@ -331,12 +331,12 @@ def create_sidebar_tasks():
     with st.sidebar:
         st.markdown("### Training Tasks")
         
-        # Display task completion header with count
-        completed_count = sum([
-            st.session_state.get('task1_completed', False),
-            st.session_state.get('task2_completed', False),
-            st.session_state.get('task3_completed', False)
-        ])
+        # # Display task completion header with count
+        # completed_count = sum([
+        #     st.session_state.get('task1_completed', False),
+        #     st.session_state.get('task2_completed', False),
+        #     st.session_state.get('task3_completed', False)
+        # ])
         
         #st.markdown(f"**{completed_count}/3 Tasks Completed**")
         
