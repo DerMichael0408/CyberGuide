@@ -280,11 +280,15 @@ def format_multiple_choice(question_text):
         main_text, options_text = question_text.split("A)", 1)
         options_text = "A)" + options_text
         
-        # Split options and format them
-        options = re.findall(r'([A-D]\))([^A-D\)]+)', options_text)
+        # FIXED REGEX: Use a better pattern that handles all options
+        options = []
+        opt_pattern = r'([A-D]\))(.*?)(?=(?:[A-D]\))|$)'
+        matches = re.findall(opt_pattern, options_text, re.DOTALL)
+        
         formatted_options = ""
-        for opt_letter, opt_text in options:
-            formatted_options += f'<div class="multiple-choice-option">{opt_letter}{opt_text}</div>'
+        for opt_letter, opt_text in matches:
+            # Added space between option letter and text for better readability
+            formatted_options += f'<div class="multiple-choice-option">{opt_letter} {opt_text.strip()}</div>'
         
         # Combine with styled question text
         return f'<div class="question-text">{main_text}</div><div class="multiple-choice">{formatted_options}</div>'
