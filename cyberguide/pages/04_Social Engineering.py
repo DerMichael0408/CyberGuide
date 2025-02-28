@@ -497,8 +497,8 @@ if user_input:
                 st.progress(100)
             
             st.success("🎓 Training completed successfully! Your results have been recorded.")
-            if st.button("📜 Download Certificate of Completion"):
-                st.info("Certificate generation would be implemented here in a production environment.")
+            #if st.button("📜 Download Certificate of Completion"):
+            #    st.info("Certificate generation would be implemented here in a production environment.")
 
     else:
         # Otherwise, get next question/feedback from LLM

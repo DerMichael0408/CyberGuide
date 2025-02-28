@@ -494,8 +494,8 @@ if user_input:
             
             # Show certificate button
             st.success("🎓 Training completed successfully! Your results have been recorded.")
-            if st.button("📜 Download Certificate of Completion"):
-                st.info("Certificate generation would be implemented here in a production environment.")
+            #if st.button("📜 Download Certificate of Completion"):
+            #    st.info("Certificate generation would be implemented here in a production environment.")
     else:
         # Generate AI response for the next question
         with st.spinner("Analyzing your response..."):
