@@ -184,9 +184,9 @@ def download_llava():
         return False
 
 def main():
-    page_icon("📄")
+    #page_icon("📄")
     role_suffix = f" (Role: {st.session_state.selected_role})" if 'selected_role' in st.session_state else ""
-    st.subheader(f"Multi-Modal{role_suffix}", divider="red", anchor=False)
+    #st.subheader(f"Multi-Modal{role_suffix}", divider="red", anchor=False)
     
     # Initialize session state
     if "chats" not in st.session_state:

@@ -320,8 +320,8 @@ def delete_model(model_name):
         return False
 
 def main():
-    page_icon("⚙️")
-    st.title("Model Management", anchor=False)
+    #page_icon("⚙️")
+    #st.title("Model Management", anchor=False)
     
     # Get the list of installed models - refresh this after operations
     installed_models = get_installed_models()

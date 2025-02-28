@@ -125,7 +125,7 @@ def main():
     """
     The main function that runs the application.
     """
-    st.subheader("Your Cyber Security Expert", divider="red", anchor=False)
+    #st.subheader("Your Cyber Security Expert", divider="red", anchor=False)
 
     client = OpenAI(
         base_url="http://localhost:11434/v1",

@@ -18,8 +18,6 @@ def main():
     )
     
     st.markdown("""
-    ## Your Interactive Cybersecurity Training Tool
-    
     CyberGuide helps you develop essential security skills through interactive scenarios tailored to your role.
     Learn to identify and respond to common security threats in a safe, guided environment.
     """)
