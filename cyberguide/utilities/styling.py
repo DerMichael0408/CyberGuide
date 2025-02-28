@@ -321,6 +321,15 @@ def create_sidebar_header():
                     st.switch_page("pages/01_CyberGuide Expert.py")
                 except Exception:
                     st.warning("Try navigating to CyberGuide Expert page manually")
+                    
+        # Dashboard navigation
+        if st.button("📈 Dashboard", key="sidebar_dashboard_btn", use_container_width=True,
+                    help="View your security dashboard"):
+            try:
+                st.switch_page("pages/07_Your Dashboard.py")
+            except Exception as e:
+                st.error(f"Navigation error: {e}")
+                st.warning("Try navigating to Dashboard page manually")
         
         st.markdown("---")
 
@@ -389,13 +398,13 @@ def create_sidebar_resources():
     with st.sidebar:
         with st.expander("Resources"):
             # Dashboard navigation
-            if st.button("Dashboard", key="sidebar_dashboard_btn", use_container_width=True,
-                        help="View your security dashboard"):
-                try:
-                    st.switch_page("pages/07_Your Dashboard.py")
-                except Exception as e:
-                    st.error(f"Navigation error: {e}")
-                    st.warning("Try navigating to Dashboard page manually")
+            #if st.button("Dashboard", key="sidebar_dashboard_btn", use_container_width=True,
+            #            help="View your security dashboard"):
+            #    try:
+            #        st.switch_page("pages/07_Your Dashboard.py")
+            #    except Exception as e:
+            #        st.error(f"Navigation error: {e}")
+            #        st.warning("Try navigating to Dashboard page manually")
                 
             # Guidelines navigation
             #if st.button("Company Guidelines", key="sidebar_guidelines_btn", use_container_width=True,
