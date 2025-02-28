@@ -1,13 +1,6 @@
 import streamlit as st
 from utilities.icon import page_icon
 from utilities.template import setup_page
-import ollama
-
-def extract_model_names(models_info):
-    """Safe model name extraction"""
-    if not models_info or not hasattr(models_info, "models"):
-        return ()
-    return tuple(model.model for model in models_info.models)
 
 def main():
     # Use setup_page instead of st.set_page_config
@@ -87,54 +80,21 @@ def main():
             if st.button("Task 3: Social Engineering", use_container_width=True):
                 st.switch_page("pages/04_Social Engineering.py")
             st.caption("Social engineering threats")
-            
-        # Task 4 removed as requested
     
     st.divider()
     
-    # Model Information
-    st.subheader("3️⃣ Available AI Models", anchor=False)
+    # Simplified Model Management Section
+    st.subheader("3️⃣ AI Model Management", anchor=False)
     
-    # Check available models
-    try:
-        models_info = ollama.list()
-        available_models = extract_model_names(models_info)
-        
-        # Recommended models
-        recommended_models = ["deepseek", "llama3", "mistral"]
-        installed_recommended = [model for model in recommended_models if any(model in available for available in available_models)]
-        missing_recommended = [model for model in recommended_models if not any(model in available for available in available_models)]
-    except:
-        installed_recommended = []
-        missing_recommended = recommended_models
+    st.markdown("""
+    CyberGuide uses local LLM models to provide interactive training. Visit the Model Management
+    page to install, configure, and manage the AI models used in your training sessions.
     
-    # Show model recommendations
-    col1, col2 = st.columns([2, 1])
+    Everything related to LLM models including installation, management, and guidance can be found there.
+    """)
     
-    with col1:
-        st.markdown("""
-        ### Recommended Models
-        
-        - **qwen2.5**: Works well with retrieved infromation. Moderate thinking duration before answering.
-        - **llava**: Great for general explanations. Tends to give short and concise answers. Short thinking duration before answering.
-        - **Mistral**: Good alternative for the other models mentioned. Moderate thinking duration before answering.
-        
-        These models must be installed via Ollama before use.
-        """)
-    
-    with col2:
-        if installed_recommended:
-            st.success("Installed Models:", icon="✅")
-            for model in installed_recommended:
-                st.markdown(f"- {model}")
-        
-        if missing_recommended:
-            st.warning("Missing Recommended Models:", icon="⚠️")
-            for model in missing_recommended:
-                st.markdown(f"- {model}")
-            
-            if st.button("Go to Model Management"):
-                st.switch_page("pages/06_Model Management.py")
+    if st.button("Go to Model Management", use_container_width=False, type="primary"):
+        st.switch_page("pages/06_Model Management.py")
 
 if __name__ == "__main__":
-    main() 
+    main()
