@@ -338,7 +338,7 @@ def create_sidebar_tasks():
             st.session_state.get('task3_completed', False)
         ])
         
-        st.markdown(f"**{completed_count}/3 Tasks Completed**")
+        #st.markdown(f"**{completed_count}/3 Tasks Completed**")
         
         # Create a container with border to visually group tasks
         with st.container(border=True):

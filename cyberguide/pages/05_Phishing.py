@@ -28,7 +28,7 @@ started_key = get_page_key("started")
 # Use setup_page for consistent styling and sidebar
 setup_page(
     page_title="Phishing Awareness Training",
-    icon_emoji="🛡️",
+    icon_emoji="🎣",
     subtitle="Learn to identify and respond to phishing attacks"
 )
 
@@ -345,9 +345,9 @@ if started_key not in st.session_state:
     st.session_state[started_key] = False
 
 # Display the training title
-st.markdown('<div class="big-title">🛡️ Phishing Awareness Training</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Complete this interactive training to strengthen your defenses against phishing attacks</div>', unsafe_allow_html=True)
-st.markdown(f"<div style='text-align: center; color: #666;'>Page: {current_page}</div>", unsafe_allow_html=True)
+#st.markdown('<div class="big-title">🛡️ Phishing Awareness Training</div>', unsafe_allow_html=True)
+#st.markdown('<div class="subtitle">Complete this interactive training to strengthen your defenses against phishing attacks</div>', unsafe_allow_html=True)
+#st.markdown(f"<div style='text-align: center; color: #666;'>Page: {current_page}</div>", unsafe_allow_html=True)
 
 # Add columns for layout
 col1, col2 = st.columns([2, 1])

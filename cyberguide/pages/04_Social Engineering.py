@@ -381,8 +381,8 @@ if started_key not in st.session_state:
     st.session_state[started_key] = False
 
 # Display the training title
-st.markdown('<div class="big-title">🕵️ Social Engineering Awareness Training</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Complete this interactive training to recognize and respond to social engineering attempts</div>', unsafe_allow_html=True)
+#st.markdown('<div class="big-title">🕵️ Social Engineering Awareness Training</div>', unsafe_allow_html=True)
+#st.markdown('<div class="subtitle">Complete this interactive training to recognize and respond to social engineering attempts</div>', unsafe_allow_html=True)
 
 # Layout columns
 col1, col2 = st.columns([2, 1])

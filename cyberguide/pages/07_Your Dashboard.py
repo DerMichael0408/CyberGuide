@@ -12,7 +12,7 @@ from utilities.template import setup_page
 # Use setup_page for consistent styling and sidebar
 setup_page(
     page_title="Security Dashboard",
-    icon_emoji="📊",
+    icon_emoji="🛡️",
     subtitle="Your personalized cybersecurity performance overview"
 )
 
@@ -439,8 +439,8 @@ def create_radar_chart(scenario_data):
 user_data = get_user_data()
 
 # Display dashboard header
-st.markdown('<div class="big-title">🛡️ CyberGuard Security Dashboard</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Your personalized cybersecurity performance overview</div>', unsafe_allow_html=True)
+#st.markdown('<div class="big-title">🛡️ CyberGuard Security Dashboard</div>', unsafe_allow_html=True)
+#st.markdown('<div class="subtitle">Your personalized cybersecurity performance overview</div>', unsafe_allow_html=True)
 
 # User information header
 with st.container():
