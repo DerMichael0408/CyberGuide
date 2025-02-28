@@ -92,11 +92,22 @@ def load_css():
         .security-warning { background-color: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; font-weight: bold; color: #c62828; }
         .security-fact { background-color: #fffde7; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; font-style: italic; }
         .mc-option { display: block; padding: 10px; margin: 8px 0; background-color: #f5f5f5; border-radius: 5px; border-left: 3px solid #ccc; }
+        
+        /* Enhanced final assessment styling */
         .final-assessment { background-color: #f0f7ff; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #2196F3; }
         .final-assessment h2 { text-align: center; margin-bottom: 20px; }
         .final-assessment h3 { margin-top: 20px; }
         .perfect-score { background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4CAF50; }
-        .final-score { font-size: 28px; text-align: center; margin: 20px 0; font-weight: bold; }
+        
+        /* New enhanced score container similar to phishing training */
+        .score-container {
+            background: linear-gradient(to right, #4CAF50, #2196F3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
         
         /* Password options styling */
         .password-option { 
@@ -120,6 +131,24 @@ def load_css():
         .password-option-strong { 
             background-color: #e3f2fd; 
             border-left-color: #2196f3; 
+        }
+        
+        /* Password requirements box */
+        .password-requirements {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .password-requirements h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #1565C0;
+        }
+        .password-requirements ul {
+            margin-bottom: 0;
+            padding-left: 20px;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -250,14 +279,13 @@ def construct_question_2():
     if password_options_key not in st.session_state:
         st.session_state[password_options_key] = generate_password_options()
     
-    # Include options in the question, but in a simple text-only format
-    # This ensures they show up in the chat message 
+    # Include options in the question with all passwords fully displayed
     options = st.session_state[password_options_key]
     
     # Construct the question
     question = "Which of these passwords is the MOST secure?\n\n"
     
-    # Add options as plain text
+    # Add all options as plain text, ensuring no placeholders
     for option in options:
         question += f"{option['letter']}) {option['password']}\n"
     
@@ -389,6 +417,80 @@ def process_answer(user_input):
         # Increment question counter
         st.session_state[question_number_key] += 1
 
+# Function to process multiple choice password answer
+def process_mc_password_answer(selected_letter):
+    """Process the multiple choice password answer with immediate LLM feedback"""
+    # Get the options from session state
+    options = st.session_state[password_options_key]
+    
+    # Find the selected option
+    selected_option = None
+    correct_option = None
+    
+    for option in options:
+        if option["letter"] == selected_letter:
+            selected_option = option
+        if option["security_level"] == "Strong":
+            correct_option = option
+    
+    # If no option was found (shouldn't happen), use fallback
+    if not selected_option:
+        selected_option = {"letter": selected_letter, "password": "Unknown", "security_level": "Unknown"}
+    
+    if not correct_option:
+        correct_option = {"letter": "D", "password": options[-1]["password"], "security_level": "Strong"}
+    
+    # Construct prompt for LLM analysis
+    analysis_prompt = f"""
+    Analyze this password selection from a multiple choice question:
+    
+    Question: Which of these passwords is the MOST secure?
+    
+    Options:
+    {', '.join([f"{opt['letter']}) {opt['password']} ({opt['security_level']})" for opt in options])}
+    
+    User selected: {selected_letter}) {selected_option['password']}
+    
+    Correct answer: {correct_option['letter']}) {correct_option['password']}
+    
+    Provide brief feedback (2-3 sentences) explaining:
+    1. Whether the user's choice was correct or incorrect
+    2. Why the selected password is strong/weak
+    3. What makes the most secure password better
+    
+    Keep your response under 100 words and focus on educational value.
+    DO NOT include the actual passwords in your response.
+    """
+    
+    # Get LLM analysis
+    with st.spinner("Analyzing your selection..."):
+        analysis_response = ollama.chat(model="llava:latest", messages=[
+            {"role": "system", "content": analysis_prompt}
+        ])
+        feedback = analysis_response["message"]["content"].strip()
+    
+    # Add user selection to chat history
+    user_message = f"My answer is {selected_letter}."
+    st.session_state[messages_key].append({"role": "user", "content": user_message})
+    
+    # Add the feedback to session state for next question
+    mc_feedback = feedback
+    
+    # Force next question with our custom feedback
+    next_question_idx = st.session_state[question_number_key] + 1
+    next_question = f"Question {next_question_idx+1}/5: {questions[next_question_idx]}"
+    ai_response = f"{mc_feedback}\n\n{next_question}"
+    
+    # Add to message history
+    st.session_state[messages_key].append({"role": "assistant", "content": ai_response})
+    
+    # Display messages
+    st.markdown(format_message(user_message, "user"), unsafe_allow_html=True)
+    st.markdown(format_message(ai_response, "assistant"), unsafe_allow_html=True)
+    
+    # Increment question counter
+    st.session_state[question_number_key] += 1
+
 # Handle the first password submission
 def handle_first_password(password_input):
     """Process the first password submission (Question 1) without showing analysis"""
@@ -441,8 +543,6 @@ def handle_final_password(password_input):
     # Add to chat history with masked password
     st.session_state[messages_key].append({"role": "user", "content": f"Final Password: {masked_password}"})
     
-    st.header("Final Password Assessment")
-    
     # Get comprehensive final assessment from LLM
     with st.spinner("Analyzing your password..."):
         # Make sure to handle possible errors
@@ -459,7 +559,7 @@ def handle_final_password(password_input):
                 "improvement_suggestions": ["Consider using a password manager."]
             }
         
-        # --- STORE RESULTS IN SESSION STATE (ADDED CODE) ---
+        # --- STORE RESULTS IN SESSION STATE ---
         # Store chat history in all_chats
         if "all_chats" not in st.session_state:
             st.session_state["all_chats"] = {}
@@ -484,53 +584,66 @@ def handle_final_password(password_input):
             "score": final_assessment["final_score"],
             "completed": True
         }
-        # --- END OF ADDED CODE ---
     
-    # Display the final score and assessment with improved formatting
-    st.markdown("""
-    <div class="final-assessment">
-    """, unsafe_allow_html=True)
+    # Create a container to ensure score and assessment stay visible
+    result_container = st.container()
     
-    st.markdown(f"""
-    <div class="final-score">Final Password Score: {final_assessment['final_score']}/100</div>
-    <p style="font-size: 18px;">{final_assessment['assessment']}</p>
-    """, unsafe_allow_html=True)
-    
-    # Display strengths
-    st.markdown("<h3>Strengths:</h3>", unsafe_allow_html=True)
-    st.markdown("<ul>", unsafe_allow_html=True)
-    
-    for strength in final_assessment['strengths']:
-        st.markdown(f"<li>{strength}</li>", unsafe_allow_html=True)
-    
-    st.markdown("</ul>", unsafe_allow_html=True)
-    
-    # Display areas for improvement
-    st.markdown("<h3>Areas for Improvement:</h3>", unsafe_allow_html=True)
-    st.markdown("<ul>", unsafe_allow_html=True)
-    
-    for weakness in final_assessment['weaknesses']:
-        st.markdown(f"<li>{weakness}</li>", unsafe_allow_html=True)
-    
-    st.markdown("</ul>", unsafe_allow_html=True)
-    
-    # Display actionable suggestions
-    st.markdown("<h3>How to Improve Your Password:</h3>", unsafe_allow_html=True)
-    st.markdown("<ul>", unsafe_allow_html=True)
-    
-    for suggestion in final_assessment['improvement_suggestions']:
-        st.markdown(f"<li>{suggestion}</li>", unsafe_allow_html=True)
-    
-    st.markdown("</ul>", unsafe_allow_html=True)
-    
-    # Display perfect score requirements
-    st.markdown(f"""
-    <div class="perfect-score">
-    <strong>To achieve a perfect 100/100 score:</strong> {final_assessment['perfect_score_requirements']}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
+    with result_container:
+        # Display the enhanced score visualization with more pronounced styling
+        score_num = final_assessment["final_score"]
+        assessment_text = final_assessment["assessment"]
+        
+        # Create enhanced visual score display with more prominence
+        score_html = f"""
+        <div class="score-container" style="margin-bottom: 30px;">
+            <h2>Password Training Complete! 🎉</h2>
+            <h1 style="font-size: 52px; margin: 20px 0; font-weight: bold;">{score_num}/100</h1>
+            <p style="font-size: 18px; margin: 15px 0;">{assessment_text}</p>
+        </div>
+        """
+        result_container.markdown(score_html, unsafe_allow_html=True)
+        
+        # Display the detailed analysis below the score in the same container
+        result_container.markdown("""
+        <div class="final-assessment">
+        <h2>Detailed Password Analysis</h2>
+        """, unsafe_allow_html=True)
+        
+        # Display strengths
+        result_container.markdown("<h3>Strengths:</h3>", unsafe_allow_html=True)
+        
+        strengths_list = "<ul>"
+        for strength in final_assessment['strengths']:
+            strengths_list += f"<li>{strength}</li>"
+        strengths_list += "</ul>"
+        result_container.markdown(strengths_list, unsafe_allow_html=True)
+        
+        # Display areas for improvement
+        result_container.markdown("<h3>Areas for Improvement:</h3>", unsafe_allow_html=True)
+        
+        weaknesses_list = "<ul>"
+        for weakness in final_assessment['weaknesses']:
+            weaknesses_list += f"<li>{weakness}</li>"
+        weaknesses_list += "</ul>"
+        result_container.markdown(weaknesses_list, unsafe_allow_html=True)
+        
+        # Display actionable suggestions
+        result_container.markdown("<h3>How to Improve Your Password:</h3>", unsafe_allow_html=True)
+        
+        suggestions_list = "<ul>"
+        for suggestion in final_assessment['improvement_suggestions']:
+            suggestions_list += f"<li>{suggestion}</li>"
+        suggestions_list += "</ul>"
+        result_container.markdown(suggestions_list, unsafe_allow_html=True)
+        
+        # Display perfect score requirements
+        result_container.markdown(f"""
+        <div class="perfect-score">
+        <strong>To achieve a perfect 100/100 score:</strong> {final_assessment['perfect_score_requirements']}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        result_container.markdown("</div>", unsafe_allow_html=True)
     
     # Create text version of assessment for message history
     assessment_text = (
@@ -560,7 +673,7 @@ def handle_final_password(password_input):
     # Complete the training
     st.session_state[question_number_key] += 1
     
-    # Show completion message and certificate button
+    # Show completion message and certificate button - outside the container to remain visible
     st.success("🎉 Congratulations on completing the Password Security Training!")
     
     if st.button("📜 Download Certificate of Completion", type="primary"):
@@ -586,51 +699,51 @@ def display_interface():
     
     # Display appropriate input method based on question type
     if is_mc:
-        # Extract options
-        if st.session_state[question_number_key] == 1:  # Password options question
-            # For password options, use the full option data with styling
+        if st.session_state[question_number_key] == 1:  # Password options question (Q2)
+            # Get password options from session state
             password_options = st.session_state[password_options_key]
             
-            # Display each password option with custom styling
-            st.write("### Select your answer:")
+            # Verify we have all four options properly populated
+            if len(password_options) != 4 or any(not opt.get("password") for opt in password_options):
+                # In case of missing options, use fallback options
+                password_options = [
+                    {"letter": "A", "password": "password123", "description": "Common word with predictable numbers", "security_level": "Very Weak"},
+                    {"letter": "B", "password": "Summer2025!", "description": "Predictable pattern with season and year", "security_level": "Weak"},
+                    {"letter": "C", "password": "BlueHorse42!", "description": "Common words with numbers and symbols", "security_level": "Moderate"},
+                    {"letter": "D", "password": "j8K#p3vR!2sT&9qZ", "description": "Random mix of characters, numbers and symbols", "security_level": "Strong"}
+                ]
+                st.session_state[password_options_key] = password_options
             
-            # Create custom styled options for passwords
-            options = []
-            for option in password_options:
-                # Determine the style class based on security level
-                security_class = ""
-                security_level = option["security_level"].lower()
-                if security_level == "very weak":
-                    bg_color = "#ffebee"  # Light red
-                elif security_level == "weak":
-                    bg_color = "#fff8e1"  # Light yellow
-                elif security_level == "moderate":
-                    bg_color = "#e8f5e9"  # Light green
-                elif security_level == "strong":
-                    bg_color = "#e3f2fd"  # Light blue
-                
-                # Add the option to our list for the radio button
-                options.append((option["letter"], option["password"]))
-                
-                # Instead of complex HTML, use Streamlit's built-in components for better display
-                border_color = '#f44336' if security_level == 'very weak' else '#ffc107' if security_level == 'weak' else '#4caf50' if security_level == 'moderate' else '#2196f3'
-                
-                # Use a container with a border to display each option
-                with st.container(border=True):
-                    # Style the letter and password with markdown
-                    st.markdown(f"**{option['letter']}) {option['password']}**")
-                    # Show security level with colored text
-                    st.markdown(f"**{security_level.title()}**: {option['description']}")
+            # Display password options clearly
+            st.write("### Select the most secure password:")
             
-            # Create radio buttons with just the letter options
-            option_texts = [f"{letter}" for letter, _ in options]
+            # Create fully visible options for radio buttons
+            options = [(opt["letter"], opt["password"]) for opt in password_options]
+            option_display = [f"{letter}) {password}" for letter, password in options]
+            
+            # Display the radio buttons in a vertical layout for better readability
             selected_option = st.radio(
-                "Choose one option (A, B, C, or D):",
-                option_texts,
-                label_visibility="visible",
+                "Choose one option:",
+                option_display,
+                label_visibility="collapsed",
                 key=f"radio_q{st.session_state[question_number_key]+1}",
-                horizontal=True
+                horizontal=False
             )
+            
+            # Extract just the letter (A, B, C, D) from the selection
+            if selected_option:
+                selected_letter = selected_option.split(")")[0].strip()
+            else:
+                selected_letter = ""
+            
+            # Submit button for password selection
+            if st.button("Submit Selection", key=f"submit_q{st.session_state[question_number_key]+1}", type="primary"):
+                if selected_letter:
+                    # Use our custom multiple choice processor for immediate feedback
+                    process_mc_password_answer(selected_letter)
+                    st.rerun()
+                else:
+                    st.error("Please select an option.")
         else:
             # For other multiple choice questions
             options = extract_multiple_choice_options(current_question)
@@ -647,21 +760,20 @@ def display_interface():
                     label_visibility="collapsed",
                     key=f"radio_q{st.session_state[question_number_key]+1}"
                 )
-            
-        # Get the selected letter - outside the if/else blocks to be accessible for all MC questions
-        if st.session_state[question_number_key] == 1:  # Password question
-            selected_letter = selected_option if selected_option else ""
-        else:
-            # Extract just the letter (A, B, C, D) from the selection for other MC questions
-            selected_letter = selected_option.split(")")[0].strip() if selected_option else ""
-        
-        # Submit button for all multiple choice questions    
-        if st.button("Submit Answer", key=f"submit_q{st.session_state[question_number_key]+1}", type="primary"):
-            # Process the selected answer
-            answer_text = f"My answer is {selected_letter}."
-            st.session_state[messages_key].append({"role": "user", "content": answer_text})
-            process_answer(answer_text)
-            st.rerun()
+                
+                # Extract just the letter (A, B, C, D) from the selection
+                selected_letter = selected_option.split(")")[0].strip() if selected_option else ""
+                
+                # Submit button for other multiple choice questions
+                if st.button("Submit Answer", key=f"submit_q{st.session_state[question_number_key]+1}", type="primary"):
+                    if selected_letter:
+                        # Process the selected answer
+                        answer_text = f"My answer is {selected_letter}."
+                        st.session_state[messages_key].append({"role": "user", "content": answer_text})
+                        process_answer(answer_text)
+                        st.rerun()
+                    else:
+                        st.error("Please select an option.")
     elif st.session_state[question_number_key] == 0:
         # Question 1: Password input
         password_input = st.text_input("Enter your password:", type="password", key="password_q1")
@@ -674,7 +786,9 @@ def display_interface():
             else:
                 st.error("Please enter a password.")
     elif st.session_state[question_number_key] == 4:
-        # Question 5: Final password
+        # Question 5: Final password creation without showing requirements
+        
+        # Password input field - no requirements displayed to avoid giving hints
         password_input = st.text_input("Enter your improved password:", type="password", key="password_q5")
         
         if st.button("Submit Final Password", key="submit_q5", type="primary"):
@@ -725,8 +839,8 @@ def main():
             st.session_state[password_options_key] = generate_password_options()
     
     # Display the training title
-    #st.markdown('<div class="big-title">🔒 Password Security Training</div>', unsafe_allow_html=True)
-    #st.markdown('<div class="subtitle">Learn how to create strong, secure passwords in this interactive training</div>', unsafe_allow_html=True)
+    st.markdown('<div class="big-title">🔒 Password Security Training</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Learn how to create strong, secure passwords in this interactive training</div>', unsafe_allow_html=True)
     
     # Display security fact
     st.markdown(f"""
