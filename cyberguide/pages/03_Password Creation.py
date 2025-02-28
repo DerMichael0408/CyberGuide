@@ -458,6 +458,33 @@ def handle_final_password(password_input):
                 "weaknesses": ["Unable to perform detailed analysis."],
                 "improvement_suggestions": ["Consider using a password manager."]
             }
+        
+        # --- STORE RESULTS IN SESSION STATE (ADDED CODE) ---
+        # Store chat history in all_chats
+        if "all_chats" not in st.session_state:
+            st.session_state["all_chats"] = {}
+        st.session_state["all_chats"][current_page] = st.session_state[messages_key]
+        
+        # Initialize scenario scores if needed
+        if "scenario_scores" not in st.session_state:
+            st.session_state.scenario_scores = {
+                "phishing": {"score": 0, "completed": False},
+                "password": {"score": 0, "completed": False},
+                "social": {"score": 0, "completed": False}
+            }
+        
+        # Only increment completed_number if not previously completed
+        if not st.session_state.scenario_scores["password"]["completed"]:
+            if "completed_number" not in st.session_state:
+                st.session_state.completed_number = 0
+            st.session_state.completed_number += 1
+        
+        # Update the scenario score
+        st.session_state.scenario_scores["password"] = {
+            "score": final_assessment["final_score"],
+            "completed": True
+        }
+        # --- END OF ADDED CODE ---
     
     # Display the final score and assessment with improved formatting
     st.markdown("""
@@ -532,28 +559,6 @@ def handle_final_password(password_input):
     
     # Complete the training
     st.session_state[question_number_key] += 1
-    
-    # Update progress for completion
-    if "completed_number" not in st.session_state:
-        st.session_state.completed_number = 0
-    
-    # Initialize scenario_scores if it doesn't exist
-    if "scenario_scores" not in st.session_state:
-        st.session_state.scenario_scores = {
-            "phishing": {"score": 0, "completed": False},
-            "password": {"score": 0, "completed": False},
-            "social": {"score": 0, "completed": False}
-        }
-    
-    # Update the scenario scores with the result
-    if not st.session_state.scenario_scores["password"]["completed"]:
-        st.session_state.completed_number += 1
-    
-    # Update the score and mark as completed
-    st.session_state.scenario_scores["password"] = {
-        "score": final_assessment["final_score"],
-        "completed": True
-    }
     
     # Show completion message and certificate button
     st.success("🎉 Congratulations on completing the Password Security Training!")
